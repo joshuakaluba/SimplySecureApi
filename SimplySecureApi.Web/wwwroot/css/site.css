@@ -1,0 +1,135 @@
+﻿html {
+    width: 100%;
+    height: 100%;
+    font-family: 'Nunito', sans-serif;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    padding-top: 20px;
+    background-color: #f5f5f5;
+    padding-bottom: 20px;
+}
+
+body {
+    padding: 0;
+    font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+    font-size: 14px;
+}
+
+.jumbotron {
+    background-color: #ffffff;
+}
+
+.form-bottom-padding {
+    padding-bottom: 30px;
+}
+
+
+.alert-results-container{
+    margin-top:30px;
+    padding-bottom:30px;
+}
+
+tr:nth-child(odd) {
+    background-color: #fff;
+}
+
+tr:nth-child(even) {
+    background-color: #f5f5f5;
+}
+
+
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+
+
+.main-body-section {
+    min-height: 100%;
+    padding-top: 50px;
+    padding-bottom:200px;
+    /*background-color: #E4F1FE;*/
+    color: #013243;
+}
+
+
+
+.footer-section {
+    min-height: 30%;
+    padding-top: 25px;
+    background-color: #343A40;
+    color: #fff;
+}
+
+.img-responsive {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+
+/*Cust*/
+
+.form-authenticate {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: 0 auto;
+}
+
+.form-authenticate .checkbox {
+    margin-top:10px;
+    font-weight: 400;
+}
+
+.form-authenticate .form-control {
+    position: relative;
+    box-sizing: border-box;
+    height: auto;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.form-authenticate .form-control:focus {
+    z-index: 2;
+}
+
+.form-authenticate input[type="email"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.form-authenticate input[type="password"] {
+    /*margin-bottom: 10px;*/
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.btn-proceed-authenticate {
+    margin-top:10px
+}
+
+.default-table-header {
+    background-color: #343A40;
+    color: #fff;
+}
+
+@media(max-width:766px) {
+
+    .main-body-section {
+        padding-top: 25px;
+    }
+}
+
+.header-spacing {
+    margin-left:5px;
+    margin-right:5px;
+    margin-top:2px;
+    margin-bottom:2px;
+}
