@@ -333,10 +333,12 @@ ASALocalRun/
 site.min.js
 site.min.css
 
-
 # VS Code
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Docker Environment File
+.env
