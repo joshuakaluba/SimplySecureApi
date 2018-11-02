@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SimplySecureApi.Data.Models.Static
 {
-    public static class ApplicationKeys
+    public static class ApplicationConfig
     {
         public static string Port
             = Environment.GetEnvironmentVariable
@@ -25,5 +23,9 @@ namespace SimplySecureApi.Data.Models.Static
         internal static string DatabaseHost
             = Environment.GetEnvironmentVariable
                 ("SIMPLY_SECURE_API_DB_HOST", target: EnvironmentVariableTarget.Process);
+
+        public static string JwtTokenKey
+            = Environment.GetEnvironmentVariable
+                ("SIMPLY_SECURE_API_JWT_KEY", target: EnvironmentVariableTarget.Process);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SimplySecureApi.Data.Models.Authentication;
+using SimplySecureApi.Data.Models.Domain.Entity;
 using SimplySecureApi.Data.Models.Static;
 
 namespace SimplySecureApi.Data.DataContext
@@ -11,13 +12,17 @@ namespace SimplySecureApi.Data.DataContext
         {
         }
 
+        internal DbSet<Module> Modules { get; set; }
+
+        internal DbSet<BootMessage> BootMessages { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionString
-                = $"Server={ApplicationKeys.DatabaseHost};" +
-                    $"database={ApplicationKeys.DatabaseName};" +
-                        $"uid={ApplicationKeys.DatabaseUser};" +
-                            $"pwd={ApplicationKeys.DatabasePassword};" +
+                = $"Server={ApplicationConfig.DatabaseHost};" +
+                    $"database={ApplicationConfig.DatabaseName};" +
+                        $"uid={ApplicationConfig.DatabaseUser};" +
+                            $"pwd={ApplicationConfig.DatabasePassword};" +
                                 $"pooling=true;";
 
             optionsBuilder.UseMySql(connectionString);

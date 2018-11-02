@@ -14,7 +14,7 @@ namespace SimplySecureApi.Web
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                    .UseUrls($"http://*:{ApplicationKeys.Port}")
+                    .UseUrls($"http://*:{ApplicationConfig.Port}")
                         .Build();
     }
 }

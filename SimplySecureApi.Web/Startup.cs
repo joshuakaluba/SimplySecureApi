@@ -5,8 +5,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using SimplySecureApi.Data.DataContext;
+using SimplySecureApi.Data.Initialization;
 using SimplySecureApi.Data.Models.Authentication;
 using System.Text;
+using SimplySecureApi.Data.Models.Static;
 using TokenOptions = SimplySecureApi.Data.Models.TokenOptions;
 
 namespace SimplySecureApi.Web
@@ -51,7 +53,7 @@ namespace SimplySecureApi.Web
                     {
                         ValidIssuer = Configuration["TokenOptions:Issuer"],
                         ValidAudience = Configuration["TokenOptions:Issuer"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenOptions:Key"])),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(ApplicationConfig.JwtTokenKey)),
                     };
                 });
 
@@ -66,27 +68,36 @@ namespace SimplySecureApi.Web
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
+            try
             {
-                app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
-                app.UseDatabaseErrorPage();
+                if (env.IsDevelopment())
+                {
+                    app.UseDeveloperExceptionPage();
+                    app.UseBrowserLink();
+                    app.UseDatabaseErrorPage();
+                }
+                else
+                {
+                    app.UseExceptionHandler("/Home/Error");
+                }
+
+                app.UseStaticFiles();
+
+                app.UseAuthentication();
+
+                app.UseMvc(routes =>
+                {
+                    routes.MapRoute(
+                        name: "default",
+                        template: "{controller=Home}/{action=Index}/{id?}");
+                });
+
+                DataContextInitializer.Seed(app.ApplicationServices).Wait();
             }
-            else
+            catch (System.Exception ex)
             {
-                app.UseExceptionHandler("/Home/Error");
+                throw ex;
             }
-
-            app.UseStaticFiles();
-
-            app.UseAuthentication();
-
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-            });
         }
     }
 }

@@ -1,0 +1,31 @@
+version: "3.3"
+
+services:
+  api_db:
+    image: mysql:5.7
+    volumes:
+      - api_db_data:/var/lib/mysql
+          
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  simply_api:
+    build: ./
+    depends_on:
+      - api_db
+    ports:
+      - ${SIMPLY_SECURE_API_APPLICATION_PORT}:${SIMPLY_SECURE_API_APPLICATION_PORT}
+    environment:
+      SIMPLY_SECURE_API_APPLICATION_PORT: ${SIMPLY_SECURE_API_APPLICATION_PORT}
+      SIMPLY_SECURE_API_DB_NAME: ${MYSQL_DATABASE}
+      SIMPLY_SECURE_API_DB_USER: ${MYSQL_USER}
+      SIMPLY_SECURE_API_DB_PASSWORD: ${MYSQL_PASSWORD}
+      SIMPLY_SECURE_API_JWT_KEY: ${SIMPLY_SECURE_API_JWT_KEY}
+      SIMPLY_SECURE_API_DB_HOST: api_db      
+
+volumes:
+    api_db_data:
+      driver: local
