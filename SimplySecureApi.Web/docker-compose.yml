@@ -25,6 +25,7 @@ services:
       SIMPLY_SECURE_API_DB_PASSWORD: ${MYSQL_PASSWORD}
       SIMPLY_SECURE_API_JWT_KEY: ${SIMPLY_SECURE_API_JWT_KEY}
       SIMPLY_SECURE_API_DB_HOST: api_db      
+      SIMPLY_SECURE_API_DB_HOST1: api_db      
 
 volumes:
     api_db_data:

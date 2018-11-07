@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Models;
+using SimplySecureApi.Data.Models.Response;
 
 namespace SimplySecureApi.Web.Controllers
 {

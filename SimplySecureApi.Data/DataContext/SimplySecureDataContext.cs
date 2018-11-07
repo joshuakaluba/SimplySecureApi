@@ -12,9 +12,13 @@ namespace SimplySecureApi.Data.DataContext
         {
         }
 
-        internal DbSet<Module> Modules { get; set; }
+        public DbSet<Module> Modules { get; set; }
 
         internal DbSet<BootMessage> BootMessages { get; set; }
+
+        internal DbSet<TriggeredModule> TriggeredModules { get; set; }
+
+        internal DbSet<ArmedModule> ArmedModules { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

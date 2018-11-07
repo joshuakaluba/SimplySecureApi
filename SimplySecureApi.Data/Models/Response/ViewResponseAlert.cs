@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace SimplySecureApi.Data.Models
+namespace SimplySecureApi.Data.Models.Response
 {
     public class ViewResponseAlert
     {

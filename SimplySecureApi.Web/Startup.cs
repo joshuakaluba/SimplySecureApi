@@ -8,6 +8,8 @@ using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Initialization;
 using SimplySecureApi.Data.Models.Authentication;
 using System.Text;
+using SimplySecureApi.Data.DataAccessLayer.Boots;
+using SimplySecureApi.Data.DataAccessLayer.Modules;
 using SimplySecureApi.Data.Models.Static;
 using TokenOptions = SimplySecureApi.Data.Models.TokenOptions;
 
@@ -32,6 +34,10 @@ namespace SimplySecureApi.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<SimplySecureDataContext>();
+
+            services.AddScoped<IBootRepository, BootRepository>();
+
+            services.AddScoped<IModuleRepository, ModuleRepository>();
 
             services.AddIdentity<ApplicationUser, IdentityRole>(option =>
             {

@@ -4,6 +4,7 @@ using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Models;
 using SimplySecureApi.Data.Models.Authentication;
 using System.Diagnostics;
+using SimplySecureApi.Data.Models.Domain.ViewModels;
 
 namespace SimplySecureApi.Web.Controllers
 {

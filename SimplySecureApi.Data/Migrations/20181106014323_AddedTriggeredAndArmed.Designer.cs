@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SimplySecureApi.Data.DataContext;
 
 namespace SimplySecureApi.Data.Migrations
 {
     [DbContext(typeof(SimplySecureDataContext))]
-    partial class SimplySecureDataContextModelSnapshot : ModelSnapshot
+    [Migration("20181106014323_AddedTriggeredAndArmed")]
+    partial class AddedTriggeredAndArmed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,24 +178,6 @@ namespace SimplySecureApi.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.ArmedModule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime>("DateCreated");
-
-                    b.Property<Guid>("ModuleId");
-
-                    b.Property<bool>("State");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ModuleId");
-
-                    b.ToTable("ArmedModules");
-                });
-
             modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.BootMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -221,8 +205,6 @@ namespace SimplySecureApi.Data.Migrations
 
                     b.Property<DateTime>("DateCreated");
 
-                    b.Property<bool>("Name");
-
                     b.Property<bool>("State");
 
                     b.Property<bool>("Triggered");
@@ -230,24 +212,6 @@ namespace SimplySecureApi.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Modules");
-                });
-
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.TriggeredModule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime>("DateCreated");
-
-                    b.Property<Guid>("ModuleId");
-
-                    b.Property<bool>("State");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ModuleId");
-
-                    b.ToTable("TriggeredModules");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -295,23 +259,7 @@ namespace SimplySecureApi.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.ArmedModule", b =>
-                {
-                    b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Module", "Module")
-                        .WithMany()
-                        .HasForeignKey("ModuleId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.BootMessage", b =>
-                {
-                    b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Module", "Module")
-                        .WithMany()
-                        .HasForeignKey("ModuleId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.TriggeredModule", b =>
                 {
                     b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Module", "Module")
                         .WithMany()

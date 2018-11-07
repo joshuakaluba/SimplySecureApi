@@ -1,4 +1,4 @@
-﻿namespace SimplySecureApi.Data.Models
+﻿namespace SimplySecureApi.Data.Models.Domain.ViewModels
 {
     public class ErrorViewModel
     {
