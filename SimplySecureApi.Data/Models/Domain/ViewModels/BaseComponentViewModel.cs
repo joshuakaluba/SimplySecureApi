@@ -4,6 +4,6 @@
     {
         public string ModuleId { get; set; }
 
-        public bool Status { get; set; }
+        public bool State { get; set; }
     }
 }

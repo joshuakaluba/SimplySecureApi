@@ -3,7 +3,7 @@ using System;
 
 namespace SimplySecureApi.Data.Models.Domain.Entity
 {
-    internal class TriggeredModule : Auditable
+    public class ModuleStateChange : Auditable
     {
         [JsonProperty("state")]
         public bool State { get; set; }

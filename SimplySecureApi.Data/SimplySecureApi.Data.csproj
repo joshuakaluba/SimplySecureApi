@@ -23,7 +23,6 @@
     <Folder Include="DataAccessLayer\ArmedModules\" />
     <Folder Include="DataAccessLayer\TriggeredModules\" />
     <Folder Include="DataAccessLayer\Users\" />
-    <Folder Include="DataAccessLayer\StatusChanges\" />
   </ItemGroup>
 
 </Project>

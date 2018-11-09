@@ -1,8 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace SimplySecureApi.Data.Models.Authentication
 {
@@ -27,22 +24,22 @@ namespace SimplySecureApi.Data.Models.Authentication
         public string Email { get; set; }
 
         [Required]
-        [DataType( DataType.Password )]
+        [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        [Display( Name = "Remember me?" )]
+        [Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
     }
 
     public class LoginWith2faViewModel
     {
         [Required]
-        [StringLength( 7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6 )]
-        [DataType( DataType.Text )]
-        [Display( Name = "Authenticator code" )]
+        [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [DataType(DataType.Text)]
+        [Display(Name = "Authenticator code")]
         public string TwoFactorCode { get; set; }
 
-        [Display( Name = "Remember this machine" )]
+        [Display(Name = "Remember this machine")]
         public bool RememberMachine { get; set; }
 
         public bool RememberMe { get; set; }
@@ -51,8 +48,8 @@ namespace SimplySecureApi.Data.Models.Authentication
     public class LoginWithRecoveryCodeViewModel
     {
         [Required]
-        [DataType( DataType.Text )]
-        [Display( Name = "Recovery Code" )]
+        [DataType(DataType.Text)]
+        [Display(Name = "Recovery Code")]
         public string RecoveryCode { get; set; }
     }
 
@@ -60,29 +57,29 @@ namespace SimplySecureApi.Data.Models.Authentication
     {
         [Required]
         [EmailAddress]
-        [Display( Name = "Email" )]
-        [JsonProperty( "email" )]
+        [Display(Name = "Email")]
+        [JsonProperty("email")]
         public string Email { get; set; }
 
         [Required]
-        [StringLength( 100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6 )]
-        [DataType( DataType.Password )]
-        [Display( Name = "Password" )]
-        [JsonProperty( "password" )]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        [Display(Name = "Password")]
+        [JsonProperty("password")]
         public string Password { get; set; }
 
-        [Display( Name = "Phone number" )]
-        [JsonProperty( "phoneNumber" )]
+        [Display(Name = "Phone number")]
+        [JsonProperty("phoneNumber")]
         public string PhoneNumber { get; set; }
 
-        [Display( Name = "Name" )]
-        [JsonProperty( "fullName" )]
+        [Display(Name = "Name")]
+        [JsonProperty("fullName")]
         public string FullName { get; set; }
 
-        [DataType( DataType.Password )]
-        [Display( Name = "Confirm password" )]
-        [Compare( "Password", ErrorMessage = "The password and confirmation password do not match." )]
-        [JsonProperty( "confirmPassword" )]
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm password")]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [JsonProperty("confirmPassword")]
         public string ConfirmPassword { get; set; }
     }
 
@@ -93,13 +90,13 @@ namespace SimplySecureApi.Data.Models.Authentication
         public string Email { get; set; }
 
         [Required]
-        [StringLength( 100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6 )]
-        [DataType( DataType.Password )]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        [DataType( DataType.Password )]
-        [Display( Name = "Confirm password" )]
-        [Compare( "Password", ErrorMessage = "The password and confirmation password do not match." )]
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm password")]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
 
         public string Code { get; set; }

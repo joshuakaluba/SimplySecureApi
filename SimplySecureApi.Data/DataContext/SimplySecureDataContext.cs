@@ -8,15 +8,13 @@ namespace SimplySecureApi.Data.DataContext
 {
     public class SimplySecureDataContext : IdentityDbContext<ApplicationUser>
     {
-        public SimplySecureDataContext()
-        {
-        }
-
         public DbSet<Module> Modules { get; set; }
 
         internal DbSet<BootMessage> BootMessages { get; set; }
 
         internal DbSet<TriggeredModule> TriggeredModules { get; set; }
+
+        internal DbSet<ModuleStateChange> ModuleStateChanges { get; set; }
 
         internal DbSet<ArmedModule> ArmedModules { get; set; }
 
@@ -30,11 +28,6 @@ namespace SimplySecureApi.Data.DataContext
                                 $"pooling=true;";
 
             optionsBuilder.UseMySql(connectionString);
-        }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SimplySecureApi.Data.DataAccessLayer.Boots;
 using SimplySecureApi.Data.DataAccessLayer.Modules;
+using SimplySecureApi.Data.DataAccessLayer.StateChanges;
 using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Domain.Entity;
 using SimplySecureApi.Data.Models.Domain.ViewModels;
@@ -14,42 +14,42 @@ namespace SimplySecureApi.Web.Controllers
     [Route("api/[controller]")]
     [Produces("application/json")]
     [ApiController]
-    public class BootController : BaseController
+    public class StateChangeController : BaseController
     {
-        public BootController(UserManager<ApplicationUser> userManager, IBootRepository bootRepository, IModuleRepository moduleRepository)
+        public StateChangeController(UserManager<ApplicationUser> userManager, IModuleRepository moduleRepository, IStateChangesRepository stateChangesRepository)
             : base(userManager)
         {
-            BootRepository = bootRepository;
-
             ModuleRepository = moduleRepository;
+
+            StateChangesRepository = stateChangesRepository;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] BaseComponentViewModel bootViewModel)
+        public async Task<IActionResult> Post([FromBody] BaseComponentViewModel stateChangeViewModel)
         {
             try
             {
                 var module
                     = await ModuleRepository.FindModule
-                        (Guid.Parse(bootViewModel.ModuleId));
+                        (Guid.Parse(stateChangeViewModel.ModuleId));
 
                 if (module == null)
                 {
                     return BadRequest(new ErrorResponse(new Exception("Invalid module id")));
                 }
 
-                var bootMessage = new BootMessage
+                var stateChange = new ModuleStateChange
                 {
-                    ModuleId = Guid.Parse(bootViewModel.ModuleId),
+                    ModuleId = module.Id,
 
-                    State = bootViewModel.State
+                    State = stateChangeViewModel.State
                 };
 
-                await BootRepository.SaveBootMessage(bootMessage);
+                await StateChangesRepository.SaveStateChange(stateChange);
 
                 var triggeredFlag = false;
 
-                if (module.Armed || module.Triggered)
+                if (module.Armed)
                 {
                     await ModuleRepository.TriggerModule(module);
 

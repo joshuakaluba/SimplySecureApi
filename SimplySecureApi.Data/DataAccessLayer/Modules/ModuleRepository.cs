@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SimplySecureApi.Data.Models.Domain.Entity;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using SimplySecureApi.Data.Models.Domain.Entity;
 
 namespace SimplySecureApi.Data.DataAccessLayer.Modules
 {

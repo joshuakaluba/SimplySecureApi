@@ -10,8 +10,8 @@ namespace SimplySecureApi.Web.Controllers
 {
     public class HomeController : BaseController
     {
-        public HomeController(UserManager<ApplicationUser> userManager, SimplySecureDataContext dbContext)
-            : base(userManager, dbContext)
+        public HomeController(UserManager<ApplicationUser> userManager)
+            : base(userManager)
         {
         }
 

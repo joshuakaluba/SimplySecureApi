@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SimplySecureApi.Data.DataAccessLayer.Boots;
 using SimplySecureApi.Data.DataAccessLayer.Modules;
+using SimplySecureApi.Data.DataAccessLayer.StateChanges;
 using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Models.Authentication;
 
@@ -11,7 +12,7 @@ namespace SimplySecureApi.Web.Controllers
 {
     public abstract class BaseController : Controller
     {
-        protected SimplySecureDataContext DbContext;
+        //protected SimplySecureDataContext DbContext;
 
         protected readonly UserManager<ApplicationUser> UserManager;
 
@@ -19,10 +20,12 @@ namespace SimplySecureApi.Web.Controllers
 
         protected IModuleRepository ModuleRepository;
 
-        protected BaseController(UserManager<ApplicationUser> userManager, SimplySecureDataContext dbContext)
+        protected IStateChangesRepository StateChangesRepository;
+
+        protected BaseController(UserManager<ApplicationUser> userManager)
         {
             this.UserManager = userManager;
-            DbContext = dbContext;
+            //DbContext = dbContext;
         }
 
         protected string GetUserId()

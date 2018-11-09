@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using SimplySecureApi.Data.Models.Domain.Entity;
+﻿using SimplySecureApi.Data.Models.Domain.Entity;
+using System.Threading.Tasks;
 
 namespace SimplySecureApi.Data.DataAccessLayer.Boots
 {

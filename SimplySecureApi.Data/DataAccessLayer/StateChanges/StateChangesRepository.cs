@@ -2,15 +2,15 @@
 using SimplySecureApi.Data.Models.Domain.Entity;
 using System.Threading.Tasks;
 
-namespace SimplySecureApi.Data.DataAccessLayer.Boots
+namespace SimplySecureApi.Data.DataAccessLayer.StateChanges
 {
-    public class BootRepository : BaseRepository, IBootRepository
+    public class StateChangesRepository : BaseRepository, IStateChangesRepository
     {
-        public async Task SaveBootMessage(BootMessage bootMessage)
+        public async Task SaveStateChange(ModuleStateChange stateChange)
         {
             using (DataContext = new SimplySecureDataContext())
             {
-                DataContext.BootMessages.Add(bootMessage);
+                DataContext.ModuleStateChanges.Add(stateChange);
 
                 await DataContext.SaveChangesAsync();
             }
