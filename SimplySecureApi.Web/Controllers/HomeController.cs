@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using SimplySecureApi.Data.DataContext;
-using SimplySecureApi.Data.Models;
 using SimplySecureApi.Data.Models.Authentication;
-using System.Diagnostics;
 using SimplySecureApi.Data.Models.Domain.ViewModels;
+using System.Diagnostics;
 
 namespace SimplySecureApi.Web.Controllers
 {

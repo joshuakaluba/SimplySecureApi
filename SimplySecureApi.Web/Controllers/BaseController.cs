@@ -1,12 +1,11 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SimplySecureApi.Data.DataAccessLayer.Boots;
 using SimplySecureApi.Data.DataAccessLayer.Modules;
 using SimplySecureApi.Data.DataAccessLayer.StateChanges;
-using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Models.Authentication;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace SimplySecureApi.Web.Controllers
 {

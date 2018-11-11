@@ -25,7 +25,7 @@ namespace SimplySecureApi.Data.DataContext
                     $"database={ApplicationConfig.DatabaseName};" +
                         $"uid={ApplicationConfig.DatabaseUser};" +
                             $"pwd={ApplicationConfig.DatabasePassword};" +
-                                $"pooling=true;";
+                                "pooling=true;";
 
             optionsBuilder.UseMySql(connectionString);
         }

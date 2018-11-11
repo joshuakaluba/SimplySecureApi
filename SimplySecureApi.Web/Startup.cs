@@ -4,14 +4,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using SimplySecureApi.Data.DataContext;
-using SimplySecureApi.Data.Initialization;
-using SimplySecureApi.Data.Models.Authentication;
-using System.Text;
 using SimplySecureApi.Data.DataAccessLayer.Boots;
 using SimplySecureApi.Data.DataAccessLayer.Modules;
 using SimplySecureApi.Data.DataAccessLayer.StateChanges;
+using SimplySecureApi.Data.DataContext;
+using SimplySecureApi.Data.Initialization;
+using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Static;
+using System.Text;
 using TokenOptions = SimplySecureApi.Data.Models.TokenOptions;
 
 namespace SimplySecureApi.Web
