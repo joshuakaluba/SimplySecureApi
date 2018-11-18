@@ -35,7 +35,7 @@ namespace SimplySecureApi.Web.Controllers
 
                 if (module == null)
                 {
-                    return BadRequest(new ErrorResponse(new Exception("Invalid module id")));
+                    return BadRequest(new Exception("Invalid module id"));
                 }
 
                 var bootMessage = new BootMessage
