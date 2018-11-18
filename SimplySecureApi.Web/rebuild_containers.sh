@@ -3,4 +3,4 @@ clear
 docker-compose stop
 docker-compose build
 docker-compose up -d
-echo "rebuilding containers done!"
+echo "Rebuilding docker-compose containers done!"
