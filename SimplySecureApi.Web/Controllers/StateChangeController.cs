@@ -38,6 +38,8 @@ namespace SimplySecureApi.Web.Controllers
                     return BadRequest(new ErrorResponse(new Exception("Invalid module id")));
                 }
 
+                await ModuleRepository.UpdateModuleState(module, stateChangeViewModel.State);
+
                 var stateChange = new ModuleStateChange
                 {
                     ModuleId = module.Id,
