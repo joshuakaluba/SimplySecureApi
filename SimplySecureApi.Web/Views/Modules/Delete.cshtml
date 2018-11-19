@@ -12,6 +12,12 @@
     <hr />
     <dl class="dl-horizontal">
         <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt>
             @Html.DisplayNameFor(model => model.State)
         </dt>
         <dd>
@@ -24,16 +30,10 @@
             @Html.DisplayFor(model => model.Armed)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.Triggered)
+            @Html.DisplayNameFor(model => model.IsMotionDetector)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.Triggered)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.DateCreated)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.DateCreated)
+            @Html.DisplayFor(model => model.IsMotionDetector)
         </dd>
     </dl>
     

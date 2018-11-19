@@ -13,6 +13,11 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <div class="checkbox">
                     <label>
                         <input asp-for="State" /> @Html.DisplayNameFor(model => model.State)
@@ -29,16 +34,11 @@
             <div class="form-group">
                 <div class="checkbox">
                     <label>
-                        <input asp-for="Triggered" /> @Html.DisplayNameFor(model => model.Triggered)
+                        <input asp-for="IsMotionDetector" /> @Html.DisplayNameFor(model => model.IsMotionDetector)
                     </label>
                 </div>
             </div>
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="DateCreated" class="control-label"></label>
-                <input asp-for="DateCreated" class="form-control" />
-                <span asp-validation-for="DateCreated" class="text-danger"></span>
-            </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />
             </div>
