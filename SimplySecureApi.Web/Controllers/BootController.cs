@@ -49,7 +49,7 @@ namespace SimplySecureApi.Web.Controllers
 
                 var triggeredFlag = false;
 
-                if (module.Armed || module.Triggered)
+                if (module.Armed)
                 {
                     await ModuleRepository.TriggerModule(module);
 
