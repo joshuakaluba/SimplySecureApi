@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SimplySecureApi.Data.DataContext;
 
 namespace SimplySecureApi.Data.Migrations
 {
     [DbContext(typeof(SimplySecureDataContext))]
-    partial class SimplySecureDataContextModelSnapshot : ModelSnapshot
+    [Migration("20181118201521_AddedModuleName")]
+    partial class AddedModuleName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,10 +222,6 @@ namespace SimplySecureApi.Data.Migrations
                     b.Property<bool>("Armed");
 
                     b.Property<DateTime>("DateCreated");
-
-                    b.Property<bool>("IsMotionDetector");
-
-                    b.Property<bool>("IsSilentAlarm");
 
                     b.Property<string>("Name");
 
