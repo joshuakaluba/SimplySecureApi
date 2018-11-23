@@ -10,22 +10,27 @@ using SimplySecureApi.Data.Models.Domain.Entity;
 
 namespace SimplySecureApi.Web.Controllers
 {
-    public class ModulesController : Controller
+    public class ModuleStateChangesController : Controller
     {
         private readonly SimplySecureDataContext _context;
 
-        public ModulesController(SimplySecureDataContext context)
+        public ModuleStateChangesController(SimplySecureDataContext context)
         {
             _context = context;
         }
 
-        // GET: Modules
+        // GET: ModuleStateChanges
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Modules.ToListAsync());
+            var simplySecureDataContext 
+                = _context.ModuleStateChanges
+                    .Include(m => m.Module)
+                        .OrderByDescending(m=>m.DateCreated);
+
+            return View(await simplySecureDataContext.ToListAsync());
         }
 
-        // GET: Modules/Details/5
+        // GET: ModuleStateChanges/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -33,40 +38,43 @@ namespace SimplySecureApi.Web.Controllers
                 return NotFound();
             }
 
-            var @module = await _context.Modules
+            var moduleStateChange = await _context.ModuleStateChanges
+                .Include(m => m.Module)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (@module == null)
+            if (moduleStateChange == null)
             {
                 return NotFound();
             }
 
-            return View(@module);
+            return View(moduleStateChange);
         }
 
-        // GET: Modules/Create
+        // GET: ModuleStateChanges/Create
         public IActionResult Create()
         {
+            ViewData["ModuleId"] = new SelectList(_context.Modules, "Id", "Id");
             return View();
         }
 
-        // POST: Modules/Create
+        // POST: ModuleStateChanges/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,State,Armed,IsMotionDetector,IsSilentAlarm,Id")] Module @module)
+        public async Task<IActionResult> Create([Bind("State,ModuleId,Id,DateCreated")] ModuleStateChange moduleStateChange)
         {
             if (ModelState.IsValid)
             {
-                @module.Id = Guid.NewGuid();
-                _context.Add(@module);
+                moduleStateChange.Id = Guid.NewGuid();
+                _context.Add(moduleStateChange);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(@module);
+            ViewData["ModuleId"] = new SelectList(_context.Modules, "Id", "Id", moduleStateChange.ModuleId);
+            return View(moduleStateChange);
         }
 
-        // GET: Modules/Edit/5
+        // GET: ModuleStateChanges/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -74,22 +82,23 @@ namespace SimplySecureApi.Web.Controllers
                 return NotFound();
             }
 
-            var @module = await _context.Modules.FindAsync(id);
-            if (@module == null)
+            var moduleStateChange = await _context.ModuleStateChanges.FindAsync(id);
+            if (moduleStateChange == null)
             {
                 return NotFound();
             }
-            return View(@module);
+            ViewData["ModuleId"] = new SelectList(_context.Modules, "Id", "Id", moduleStateChange.ModuleId);
+            return View(moduleStateChange);
         }
 
-        // POST: Modules/Edit/5
+        // POST: ModuleStateChanges/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Name,State,Armed,IsMotionDetector,IsSilentAlarm,Id")] Module @module)
+        public async Task<IActionResult> Edit(Guid id, [Bind("State,ModuleId,Id,DateCreated")] ModuleStateChange moduleStateChange)
         {
-            if (id != @module.Id)
+            if (id != moduleStateChange.Id)
             {
                 return NotFound();
             }
@@ -98,12 +107,12 @@ namespace SimplySecureApi.Web.Controllers
             {
                 try
                 {
-                    _context.Update(@module);
+                    _context.Update(moduleStateChange);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ModuleExists(@module.Id))
+                    if (!ModuleStateChangeExists(moduleStateChange.Id))
                     {
                         return NotFound();
                     }
@@ -114,10 +123,11 @@ namespace SimplySecureApi.Web.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(@module);
+            ViewData["ModuleId"] = new SelectList(_context.Modules, "Id", "Id", moduleStateChange.ModuleId);
+            return View(moduleStateChange);
         }
 
-        // GET: Modules/Delete/5
+        // GET: ModuleStateChanges/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -125,30 +135,31 @@ namespace SimplySecureApi.Web.Controllers
                 return NotFound();
             }
 
-            var @module = await _context.Modules
+            var moduleStateChange = await _context.ModuleStateChanges
+                .Include(m => m.Module)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (@module == null)
+            if (moduleStateChange == null)
             {
                 return NotFound();
             }
 
-            return View(@module);
+            return View(moduleStateChange);
         }
 
-        // POST: Modules/Delete/5
+        // POST: ModuleStateChanges/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var @module = await _context.Modules.FindAsync(id);
-            _context.Modules.Remove(@module);
+            var moduleStateChange = await _context.ModuleStateChanges.FindAsync(id);
+            _context.ModuleStateChanges.Remove(moduleStateChange);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ModuleExists(Guid id)
+        private bool ModuleStateChangeExists(Guid id)
         {
-            return _context.Modules.Any(e => e.Id == id);
+            return _context.ModuleStateChanges.Any(e => e.Id == id);
         }
     }
 }
