@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +13,7 @@ using SimplySecureApi.Data.Initialization;
 using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Static;
 using System.Text;
+using NSwag.AspNetCore;
 using TokenOptions = SimplySecureApi.Data.Models.TokenOptions;
 
 namespace SimplySecureApi.Web
@@ -41,6 +43,8 @@ namespace SimplySecureApi.Web
             services.AddScoped<IBootRepository, BootRepository>();
 
             services.AddScoped<IModuleRepository, ModuleRepository>();
+
+            services.AddSwagger();
 
             services.AddIdentity<ApplicationUser, IdentityRole>(option =>
             {
@@ -93,6 +97,11 @@ namespace SimplySecureApi.Web
                 app.UseStaticFiles();
 
                 app.UseAuthentication();
+
+                app.UseSwaggerUi(typeof(Startup).GetTypeInfo().Assembly, settings =>
+                {
+                    settings.GeneratorSettings.DefaultUrlTemplate = "{controller}/{action}/{id?}";
+                });
 
                 app.UseMvc(routes =>
                 {
