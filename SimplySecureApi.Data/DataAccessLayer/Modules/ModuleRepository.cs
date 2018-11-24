@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Models.Domain.Entity;
 using System;
 using System.Linq;
@@ -10,21 +11,40 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
     {
         public async Task<Module> FindModule(Guid moduleId)
         {
-            var module
-                = await DataContext.Modules
-                    .Where(m => m.Id == moduleId)
-                        .FirstOrDefaultAsync();
+            using (DataContext = new SimplySecureDataContext())
+            {
+                var module
+                    = await DataContext.Modules
+                        .Where(m => m.Id == moduleId)
+                            .Include(m=>m.Location)
+                                .FirstOrDefaultAsync();
 
-            return module;
+                return module;
+            }
         }
 
         public async Task TriggerModule(Module module)
         {
-            module.Triggered = true;
+            using (DataContext = new SimplySecureDataContext())
+            {
+                module.Location.Triggered = true;
 
-            DataContext.Modules.Update(module);
+                DataContext.Modules.Update(module);
 
-            await DataContext.SaveChangesAsync();
+                await DataContext.SaveChangesAsync();
+            }
+        }
+
+        public async Task UpdateModuleState(Module module, bool state)
+        {
+            using (DataContext = new SimplySecureDataContext())
+            {
+                module.State = state;
+
+                DataContext.Modules.Update(module);
+
+                await DataContext.SaveChangesAsync();
+            }
         }
     }
 }

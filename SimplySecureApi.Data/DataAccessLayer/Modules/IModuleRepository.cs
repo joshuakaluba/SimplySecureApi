@@ -8,5 +8,7 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
         Task<Models.Domain.Entity.Module> FindModule(Guid moduleId);
 
         Task TriggerModule(Models.Domain.Entity.Module module);
+
+        Task UpdateModuleState(Models.Domain.Entity.Module module, bool state);
     }
 }
