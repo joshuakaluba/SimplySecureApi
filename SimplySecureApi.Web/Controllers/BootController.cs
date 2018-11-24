@@ -49,7 +49,7 @@ namespace SimplySecureApi.Web.Controllers
 
                 var triggeredFlag = false;
 
-                if (module.Armed)
+                if (module.Location.Armed)
                 {
                     await ModuleRepository.TriggerModule(module);
 
@@ -58,7 +58,7 @@ namespace SimplySecureApi.Web.Controllers
 
                 var moduleResponse = new ModuleResponse
                 {
-                    Armed = module.Armed,
+                    Armed = module.Location.Armed,
 
                     Triggered = triggeredFlag
                 };
