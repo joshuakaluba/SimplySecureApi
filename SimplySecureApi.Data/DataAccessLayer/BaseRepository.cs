@@ -8,7 +8,6 @@ namespace SimplySecureApi.Data.DataAccessLayer
 
         protected BaseRepository()
         {
-            DataContext = new SimplySecureDataContext();
         }
     }
 }
