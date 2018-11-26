@@ -6,25 +6,25 @@ using SimplySecureApi.Data.DataAccessLayer.StateChanges;
 using SimplySecureApi.Data.Models.Authentication;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using SimplySecureApi.Data.DataAccessLayer.Locations;
 
 namespace SimplySecureApi.Web.Controllers
 {
     public abstract class BaseController : Controller
     {
-        //protected SimplySecureDataContext DbContext;
-
         protected readonly UserManager<ApplicationUser> UserManager;
 
         protected IBootRepository BootRepository;
 
         protected IModuleRepository ModuleRepository;
 
-        protected IStateChangesRepository StateChangesRepository;
+        protected IStateChangeRepository StateChangeRepository;
+
+        protected ILocationRepository LocationRepository;
 
         protected BaseController(UserManager<ApplicationUser> userManager)
         {
             this.UserManager = userManager;
-            //DbContext = dbContext;
         }
 
         protected string GetUserId()
