@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SimplySecureApi.Data.DataAccessLayer.Boots;
+using SimplySecureApi.Data.DataAccessLayer.Locations;
 using SimplySecureApi.Data.DataAccessLayer.Modules;
 using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Domain.Entity;
 using SimplySecureApi.Data.Models.Domain.ViewModels;
 using SimplySecureApi.Data.Models.Response;
+using SimplySecureApi.Data.Services;
 using System;
 using System.Threading.Tasks;
 
@@ -16,12 +18,14 @@ namespace SimplySecureApi.Web.Controllers
     [ApiController]
     public class BootController : BaseController
     {
-        public BootController(UserManager<ApplicationUser> userManager, IBootRepository bootRepository, IModuleRepository moduleRepository)
+        public BootController(UserManager<ApplicationUser> userManager, IBootRepository bootRepository, IModuleRepository moduleRepository, ILocationRepository locationRepository)
             : base(userManager)
         {
             BootRepository = bootRepository;
 
             ModuleRepository = moduleRepository;
+
+            LocationRepository = locationRepository;
         }
 
         [HttpPost]
@@ -38,30 +42,13 @@ namespace SimplySecureApi.Web.Controllers
                     return BadRequest(new Exception("Invalid module id"));
                 }
 
-                var bootMessage = new BootMessage
-                {
-                    ModuleId = Guid.Parse(bootViewModel.ModuleId),
+                await BootRepository
+                    .SaveBootMessage
+                        (new BootMessage(module.Id, bootViewModel.State));
 
-                    State = bootViewModel.State
-                };
-
-                await BootRepository.SaveBootMessage(bootMessage);
-
-                var triggeredFlag = false;
-
-                if (module.Location.Armed)
-                {
-                    await ModuleRepository.TriggerModule(module);
-
-                    triggeredFlag = true;
-                }
-
-                var moduleResponse = new ModuleResponse
-                {
-                    Armed = module.Location.Armed,
-
-                    Triggered = triggeredFlag
-                };
+                var moduleResponse
+                    = await LocationTriggeringService
+                        .ProcessLocationTriggered(LocationRepository, module.Location);
 
                 return Ok(moduleResponse);
             }
