@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using SimplySecureApi.Data.DataAccessLayer.Locations;
 using SimplySecureApi.Data.DataAccessLayer.Modules;
 using SimplySecureApi.Data.DataAccessLayer.StateChanges;
 using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Domain.Entity;
 using SimplySecureApi.Data.Models.Domain.ViewModels;
 using SimplySecureApi.Data.Models.Response;
+using SimplySecureApi.Data.Services;
 using System;
 using System.Threading.Tasks;
 
@@ -16,12 +18,14 @@ namespace SimplySecureApi.Web.Controllers
     [ApiController]
     public class StateChangeController : BaseController
     {
-        public StateChangeController(UserManager<ApplicationUser> userManager, IModuleRepository moduleRepository, IStateChangesRepository stateChangesRepository)
+        public StateChangeController(UserManager<ApplicationUser> userManager, IModuleRepository moduleRepository, IStateChangeRepository stateChangeRepository, ILocationRepository locationRepository)
             : base(userManager)
         {
             ModuleRepository = moduleRepository;
 
-            StateChangesRepository = stateChangesRepository;
+            StateChangeRepository = stateChangeRepository;
+
+            LocationRepository = locationRepository;
         }
 
         [HttpPost]
@@ -40,30 +44,13 @@ namespace SimplySecureApi.Web.Controllers
 
                 await ModuleRepository.UpdateModuleState(module, stateChangeViewModel.State);
 
-                var stateChange = new ModuleStateChange
-                {
-                    ModuleId = module.Id,
+                await StateChangeRepository
+                    .SaveStateChange
+                        (new ModuleStateChange(module.Id, stateChangeViewModel.State));
 
-                    State = stateChangeViewModel.State
-                };
-
-                await StateChangesRepository.SaveStateChange(stateChange);
-
-                var triggeredFlag = false;
-
-                if (module.Location.Armed)
-                {
-                    await ModuleRepository.TriggerModule(module);
-
-                    triggeredFlag = true;
-                }
-
-                var moduleResponse = new ModuleResponse
-                {
-                    Armed = module.Location.Armed,
-
-                    Triggered = triggeredFlag
-                };
+                var moduleResponse
+                    = await LocationTriggeringService
+                        .ProcessLocationTriggered(LocationRepository, module.Location);
 
                 return Ok(moduleResponse);
             }
