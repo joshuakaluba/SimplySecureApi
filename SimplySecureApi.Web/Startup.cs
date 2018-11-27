@@ -14,6 +14,7 @@ using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Static;
 using System.Text;
 using NSwag.AspNetCore;
+using SimplySecureApi.Data.DataAccessLayer.Locations;
 using TokenOptions = SimplySecureApi.Data.Models.TokenOptions;
 
 namespace SimplySecureApi.Web
@@ -38,11 +39,13 @@ namespace SimplySecureApi.Web
         {
             services.AddDbContext<SimplySecureDataContext>();
 
-            services.AddScoped<IStateChangesRepository, StateChangesRepository>();
+            services.AddScoped<IStateChangeRepository, StateChangeRepository>();
 
             services.AddScoped<IBootRepository, BootRepository>();
 
             services.AddScoped<IModuleRepository, ModuleRepository>();
+
+            services.AddScoped<ILocationRepository, LocationRepository>();
 
             services.AddSwagger();
 
