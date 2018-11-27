@@ -3,6 +3,7 @@ version: "3.3"
 services:
   api_db:
     image: mysql:5.7
+    restart: always
     volumes:
       - api_db_data_volume:/var/lib/mysql
           
@@ -14,6 +15,7 @@ services:
 
   simply_api:
     build: ./
+    restart: always
     depends_on:
       - api_db
     ports:
