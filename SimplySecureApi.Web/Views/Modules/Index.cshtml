@@ -19,10 +19,10 @@
                 @Html.DisplayNameFor(model => model.State)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Armed)
+                @Html.DisplayNameFor(model => model.IsMotionDetector)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.IsMotionDetector)
+                @Html.DisplayNameFor(model => model.Location)
             </th>
             <th></th>
         </tr>
@@ -37,10 +37,10 @@
                 @Html.DisplayFor(modelItem => item.State)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Armed)
+                @Html.DisplayFor(modelItem => item.IsMotionDetector)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.IsMotionDetector)
+                @Html.DisplayFor(modelItem => item.Location.Name)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
