@@ -342,3 +342,6 @@ site.min.css
 
 # Docker Environment File
 .env
+
+#Generated SQLite Database
+SimplySecureApiDb.db
