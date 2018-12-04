@@ -1,14 +1,13 @@
-﻿using System;
+﻿using SimplySecureApi.Data.Models.Domain.Entity;
+using System;
 using System.Threading.Tasks;
 
 namespace SimplySecureApi.Data.DataAccessLayer.Modules
 {
     public interface IModuleRepository
     {
-        Task<Models.Domain.Entity.Module> FindModule(Guid moduleId);
+        Task<Module> FindModule(Guid moduleId);
 
-        Task TriggerModule(Models.Domain.Entity.Module module);
-
-        Task UpdateModuleState(Models.Domain.Entity.Module module, bool state);
+        Task UpdateModuleState(Module module, bool state);
     }
 }
