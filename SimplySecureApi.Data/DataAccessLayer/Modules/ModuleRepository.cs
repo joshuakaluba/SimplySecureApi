@@ -16,22 +16,10 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
                 var module
                     = await DataContext.Modules
                         .Where(m => m.Id == moduleId)
-                            .Include(m=>m.Location)
+                            .Include(m => m.Location)
                                 .FirstOrDefaultAsync();
 
                 return module;
-            }
-        }
-
-        public async Task TriggerModule(Module module)
-        {
-            using (DataContext = new SimplySecureDataContext())
-            {
-                module.Location.Triggered = true;
-
-                DataContext.Modules.Update(module);
-
-                await DataContext.SaveChangesAsync();
             }
         }
 
