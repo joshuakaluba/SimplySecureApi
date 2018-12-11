@@ -22,7 +22,9 @@ namespace SimplySecureApi.Web.Controllers
         public TokenController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IOptions<TokenOptions> tokens)
         {
             _userManager = userManager;
+
             _signInManager = signInManager;
+
             _tokenOptions = tokens.Value;
         }
 
