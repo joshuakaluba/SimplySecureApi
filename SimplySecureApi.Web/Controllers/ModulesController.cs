@@ -1,161 +1,221 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using SimplySecureApi.Data.DataContext;
+using SimplySecureApi.Data.DataAccessLayer.Locations;
+using SimplySecureApi.Data.DataAccessLayer.Modules;
+using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Domain.Entity;
+using SimplySecureApi.Data.Models.Response;
+using System;
+using System.Threading.Tasks;
 
 namespace SimplySecureApi.Web.Controllers
 {
-    public class ModulesController : Controller
+    public class ModulesController : BaseController
     {
-        private readonly SimplySecureDataContext _context;
+        private readonly IModuleRepository _moduleRepository;
+        private readonly ILocationRepository _locationRepository;
 
-        public ModulesController(SimplySecureDataContext context)
+        public ModulesController(UserManager<ApplicationUser> userManager, IModuleRepository moduleRepository, ILocationRepository locationRepository)
+            : base(userManager)
         {
-            _context = context;
+            _moduleRepository = moduleRepository;
+
+            _locationRepository = locationRepository;
         }
 
-        // GET: Modules
         public async Task<IActionResult> Index()
         {
-            var simplySecureDataContext = _context.Modules.Include(m => m.Location);
-            return View(await simplySecureDataContext.ToListAsync());
-        }
-
-        // GET: Modules/Details/5
-        public async Task<IActionResult> Details(Guid? id)
-        {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                var modules = await _moduleRepository.GetAllModules();
 
-            var @module = await _context.Modules
-                .Include(m => m.Location)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (@module == null)
+                return View(modules);
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Error", "Home");
             }
-
-            return View(@module);
         }
 
-        // GET: Modules/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Id");
-            return View();
+            try
+            {
+                var locations = await _locationRepository.GetLocations();
+
+                ViewData["LocationId"] = new SelectList(locations, "Id", "Name");
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Error", "Home");
+            }
         }
 
-        // POST: Modules/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,State,IsMotionDetector,LocationId,Id")] Module module)
+        public async Task<IActionResult> Create([Bind("Name,State,IsMotionDetector,LocationId")] Module module)
         {
-            if (ModelState.IsValid)
+            try
             {
-                @module.Id = Guid.NewGuid();
-                _context.Add(@module);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    module.Id = Guid.NewGuid();
+
+                    await _moduleRepository.CreateModule(module);
+
+                    TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{module.Name} module created successfully.");
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var locations = await _locationRepository.GetLocations();
+
+                ViewData["LocationId"] = new SelectList(locations, "Id", "Name", module.LocationId);
+
+                return View(module);
             }
-            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Id", module.Name);
-            return View(@module);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Error", "Home");
+            }
         }
 
-        // GET: Modules/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                if (id == null)
+                {
+                    return NotFound();
+                }
 
-            var @module = await _context.Modules.FindAsync(id);
-            if (@module == null)
-            {
-                return NotFound();
+                var module = await _moduleRepository.FindModule((Guid)id);
+
+                if (module == null)
+                {
+                    return NotFound();
+                }
+
+                var locations = await _locationRepository.GetLocations();
+
+                ViewData["LocationId"] = new SelectList(locations, "Id", "Name", module.LocationId);
+
+                return View(module);
             }
-            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Id", module.LocationId);
-            return View(@module);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Error", "Home");
+            }
         }
 
-        // POST: Modules/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Name,State,IsMotionDetector,LocationId,Id")] Module module)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Name,IsMotionDetector,LocationId,Id")] Module module)
         {
-            if (id != @module.Id)
+            try
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                if (id != module.Id)
                 {
-                    _context.Update(@module);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+
+                if (ModelState.IsValid)
                 {
-                    if (!ModuleExists(module.Id))
+                    var dbModule = await _moduleRepository.FindModule(module.Id);
+
+                    if (dbModule == null)
                     {
                         return NotFound();
                     }
-                    else
-                    {
-                        throw;
-                    }
+
+                    dbModule.Name = module.Name;
+                    dbModule.IsMotionDetector = module.IsMotionDetector;
+                    dbModule.LocationId = module.LocationId;
+
+                    await _moduleRepository.UpdateModule(dbModule);
+
+                    TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{module.Name} module saved successfully.");
+
+                    return RedirectToAction(nameof(Index));
                 }
-                return RedirectToAction(nameof(Index));
+
+                var locations = await _locationRepository.GetLocations();
+
+                ViewData["LocationId"] = new SelectList(locations, "Id", "Name", module.LocationId);
+
+                return View(module);
             }
-            ViewData["LocationId"] = new SelectList(_context.Locations, "Id", "Id",module.Name);
-            return View(@module);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Error", "Home");
+            }
         }
 
-        // GET: Modules/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                if (id == null)
+                {
+                    return NotFound();
+                }
 
-            var @module = await _context.Modules
-                .Include(m => m.Location)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (@module == null)
+                var module
+                    = await _moduleRepository.FindModule((Guid)id);
+
+                if (module == null)
+                {
+                    return NotFound();
+                }
+
+                return View(module);
+            }
+            catch (Exception ex)
             {
-                return NotFound();
-            }
+                TempData["ErrorMessage"] = ex.Message;
 
-            return View(@module);
+                return RedirectToAction("Error", "Home");
+            }
         }
 
-        // POST: Modules/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var @module = await _context.Modules.FindAsync(id);
-            _context.Modules.Remove(@module);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+            try
+            {
+                var module = await _moduleRepository.FindModule(id);
 
-        private bool ModuleExists(Guid id)
-        {
-            return _context.Modules.Any(e => e.Id == id);
+                if (module == null)
+                {
+                    return NotFound();
+                }
+
+                await _moduleRepository.DeleteModule(module);
+
+                TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{module.Name} module deleted successfully.");
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Error", "Home");
+            }
         }
     }
 }
