@@ -1,154 +1,160 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using SimplySecureApi.Data.DataContext;
+using SimplySecureApi.Data.DataAccessLayer.Locations;
+using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Domain.Entity;
+using SimplySecureApi.Data.Models.Response;
+using System;
+using System.Threading.Tasks;
 
 namespace SimplySecureApi.Web.Controllers
 {
-    public class LocationsController : Controller
+    public class LocationsController : BaseController
     {
-        private readonly SimplySecureDataContext _context;
+        private readonly ILocationRepository _locationRepository;
 
-        public LocationsController(SimplySecureDataContext context)
+        public LocationsController(UserManager<ApplicationUser> userManager, ILocationRepository locationRepository)
+            : base(userManager)
         {
-            _context = context;
+            _locationRepository = locationRepository;
         }
 
-        // GET: Locations
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Locations.ToListAsync());
+            try
+            {
+                var locations
+                    = await _locationRepository.GetLocations();
+
+                return View(locations);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Error", "Home");
+            }
         }
 
-        // GET: Locations/Details/5
-        public async Task<IActionResult> Details(Guid? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var location = await _context.Locations
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (location == null)
-            {
-                return NotFound();
-            }
-
-            return View(location);
-        }
-
-        // GET: Locations/Create
         public IActionResult Create()
         {
-            return View();
+            try
+            {
+                return View();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Error", "Home");
+            }
         }
 
-        // POST: Locations/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Armed,IsSilentAlarm,Id")] Location location)
+        public async Task<IActionResult> Create([Bind("Name,IsSilentAlarm")] Location location)
         {
-            if (ModelState.IsValid)
+            try
             {
-                location.Id = Guid.NewGuid();
-                _context.Add(location);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    location.Id = Guid.NewGuid();
+                    location.Armed = false;
+                    location.Triggered = false;
+                    location.Active = true;
+
+                    await _locationRepository.CreateLocation(location);
+
+                    TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{location.Name} created successfully.");
+
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(location);
             }
-            return View(location);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Error", "Home");
+            }
         }
 
-        // GET: Locations/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                if (id == null)
+                {
+                    return NotFound();
+                }
 
-            var location = await _context.Locations.FindAsync(id);
-            if (location == null)
-            {
-                return NotFound();
+                var location
+                    = await _locationRepository.FindLocationById((Guid)id);
+
+                if (location == null)
+                {
+                    return NotFound();
+                }
+
+                return View(location);
             }
-            return View(location);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Error", "Home");
+            }
         }
 
-        // POST: Locations/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Name,Armed,IsSilentAlarm,Id")] Location location)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Armed,IsSilentAlarm,Id")] Location location)
         {
-            if (id != location.Id)
+            try
             {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                if (id != location.Id)
                 {
-                    _context.Update(location);
-                    await _context.SaveChangesAsync();
+                    return NotFound();
                 }
-                catch (DbUpdateConcurrencyException)
+
+                if (ModelState.IsValid)
                 {
-                    if (!LocationExists(location.Id))
+                    var armed = location.Armed;
+
+                    var dbLocation = await _locationRepository.FindLocationById(location.Id);
+
+                    if (dbLocation != null)
                     {
-                        return NotFound();
+                        dbLocation.IsSilentAlarm = location.IsSilentAlarm;
+
+                        if (armed)
+                        {
+                            await _locationRepository.ArmLocation(dbLocation);
+
+                            TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{dbLocation.Name} successfully armed.");
+                        }
+                        else
+                        {
+                            await _locationRepository.DisarmLocation(dbLocation);
+
+                            TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{dbLocation.Name} successfully disarmed.");
+                        }
                     }
                     else
                     {
-                        throw;
+                        return NotFound();
                     }
+
+                    return RedirectToAction(nameof(Index));
                 }
-                return RedirectToAction(nameof(Index));
+                return View(location);
             }
-            return View(location);
-        }
-
-        // GET: Locations/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
-        {
-            if (id == null)
+            catch (Exception ex)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = ex.Message;
+
+                return RedirectToAction("Error", "Home");
             }
-
-            var location = await _context.Locations
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (location == null)
-            {
-                return NotFound();
-            }
-
-            return View(location);
-        }
-
-        // POST: Locations/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
-        {
-            var location = await _context.Locations.FindAsync(id);
-            _context.Locations.Remove(location);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool LocationExists(Guid id)
-        {
-            return _context.Locations.Any(e => e.Id == id);
         }
     }
 }
