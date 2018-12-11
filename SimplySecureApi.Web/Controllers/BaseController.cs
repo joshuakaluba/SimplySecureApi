@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SimplySecureApi.Data.DataAccessLayer.Boots;
 using SimplySecureApi.Data.DataAccessLayer.Modules;
-using SimplySecureApi.Data.DataAccessLayer.StateChanges;
+using SimplySecureApi.Data.DataAccessLayer.ModuleEvents;
 using SimplySecureApi.Data.Models.Authentication;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -13,14 +13,6 @@ namespace SimplySecureApi.Web.Controllers
     public abstract class BaseController : Controller
     {
         protected readonly UserManager<ApplicationUser> UserManager;
-
-        protected IBootRepository BootRepository;
-
-        protected IModuleRepository ModuleRepository;
-
-        protected IStateChangeRepository StateChangeRepository;
-
-        protected ILocationRepository LocationRepository;
 
         protected BaseController(UserManager<ApplicationUser> userManager)
         {
