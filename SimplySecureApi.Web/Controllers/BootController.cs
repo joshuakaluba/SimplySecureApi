@@ -10,6 +10,7 @@ using SimplySecureApi.Data.Models.Response;
 using SimplySecureApi.Data.Services;
 using System;
 using System.Threading.Tasks;
+using SimplySecureApi.Data.Services.Messaging;
 
 namespace SimplySecureApi.Web.Controllers
 {
@@ -18,14 +19,21 @@ namespace SimplySecureApi.Web.Controllers
     [ApiController]
     public class BootController : BaseController
     {
-        public BootController(UserManager<ApplicationUser> userManager, IBootRepository bootRepository, IModuleRepository moduleRepository, ILocationRepository locationRepository)
+        private readonly IBootRepository _bootRepository;
+        private readonly IModuleRepository _moduleRepository;
+        private readonly ILocationRepository _locationRepository;
+        private readonly IMessagingService _messagingService;
+
+        public BootController(UserManager<ApplicationUser> userManager, IBootRepository bootRepository, IModuleRepository moduleRepository, ILocationRepository locationRepository, IMessagingService messagingService)
             : base(userManager)
         {
-            BootRepository = bootRepository;
+            _bootRepository = bootRepository;
 
-            ModuleRepository = moduleRepository;
+            _moduleRepository = moduleRepository;
 
-            LocationRepository = locationRepository;
+            _locationRepository = locationRepository;
+
+            _messagingService = messagingService;
         }
 
         [HttpPost]
@@ -34,7 +42,7 @@ namespace SimplySecureApi.Web.Controllers
             try
             {
                 var module
-                    = await ModuleRepository.FindModule
+                    = await _moduleRepository.FindModule
                         (Guid.Parse(bootViewModel.ModuleId));
 
                 if (module == null)
@@ -42,13 +50,17 @@ namespace SimplySecureApi.Web.Controllers
                     return BadRequest(new Exception("Invalid module id"));
                 }
 
-                await BootRepository
+                await _bootRepository
                     .SaveBootMessage
                         (new BootMessage(module.Id, bootViewModel.State));
 
                 var moduleResponse
                     = await LocationTriggeringService
-                        .ProcessLocationTriggered(LocationRepository, module.Location);
+                        .DetermineIfTriggering(_locationRepository, _messagingService, module);
+
+                module.State = bootViewModel.State;
+
+                await _moduleRepository.UpdateModuleLastBoot(module);
 
                 return Ok(moduleResponse);
             }
