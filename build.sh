@@ -1,0 +1,1 @@
+dotnet publish ./SimplySecureApi.Web/SimplySecureApi.Web.csproj -o ../ApiPublishFiles -c Release
