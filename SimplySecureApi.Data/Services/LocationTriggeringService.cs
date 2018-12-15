@@ -1,19 +1,24 @@
 ﻿using SimplySecureApi.Data.DataAccessLayer.Locations;
 using SimplySecureApi.Data.Models.Domain.Entity;
 using SimplySecureApi.Data.Models.Response;
+using SimplySecureApi.Data.Services.Messaging;
 using System.Threading.Tasks;
 
 namespace SimplySecureApi.Data.Services
 {
     public class LocationTriggeringService
     {
-        public static async Task<ModuleResponse> ProcessLocationTriggered(ILocationRepository locationRepository, Location location)
+        public static async Task<ModuleResponse> DetermineIfTriggering(ILocationRepository locationRepository, IMessagingService messagingService, Module module)
         {
+            var location = module.Location;
+
             var triggeredFlag = false;
 
-            if (location.Armed)
+            if (location.Armed && location.IsNotTriggered)
             {
                 await locationRepository.TriggerLocation(location);
+
+                await messagingService.SendModuleTriggeredMessage(module);
 
                 triggeredFlag = true;
             }
