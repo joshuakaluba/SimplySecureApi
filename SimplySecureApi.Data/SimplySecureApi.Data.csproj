@@ -1,12 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.2" />
-     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.6" /> 
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.4" />
+     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.2.0" /> 
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SimplySecureApi.Common\SimplySecureApi.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,13 +20,6 @@
     <Reference Include="Microsoft.Extensions.Identity.Stores">
       
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="DataAccessLayer\HeartBeats\" />
-    <Folder Include="DataAccessLayer\ArmedModules\" />
-    <Folder Include="DataAccessLayer\TriggeredModules\" />
-    <Folder Include="DataAccessLayer\Users\" />
   </ItemGroup>
 
 </Project>
