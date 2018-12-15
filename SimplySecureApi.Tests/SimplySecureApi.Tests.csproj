@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -13,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SimplySecureApi.Common\SimplySecureApi.Common.csproj" />
     <ProjectReference Include="..\SimplySecureApi.Data\SimplySecureApi.Data.csproj" />
   </ItemGroup>
 
