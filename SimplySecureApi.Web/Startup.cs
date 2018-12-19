@@ -7,15 +7,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using SimplySecureApi.Data.DataAccessLayer.Boots;
 using SimplySecureApi.Data.DataAccessLayer.Modules;
-using SimplySecureApi.Data.DataAccessLayer.StateChanges;
+using SimplySecureApi.Data.DataAccessLayer.ModuleEvents;
 using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Initialization;
 using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Static;
+using Microsoft.AspNetCore.Mvc;
 using System.Text;
-using NSwag.AspNetCore;
+using SimplySecureApi.Data.DataAccessLayer.Authentication;
 using SimplySecureApi.Data.DataAccessLayer.Locations;
-using TokenOptions = SimplySecureApi.Data.Models.TokenOptions;
+using SimplySecureApi.Data.Services.Messaging;
+using SimplySecureApi.Web.MiddleWare;
+using TokenOptions = SimplySecureApi.Data.Models.Authentication.TokenOptions;
 
 namespace SimplySecureApi.Web
 {
@@ -39,15 +42,25 @@ namespace SimplySecureApi.Web
         {
             services.AddDbContext<SimplySecureDataContext>();
 
-            services.AddScoped<IStateChangeRepository, StateChangeRepository>();
+            services.AddScoped<IModuleEventRepository, ModuleEventRepository>();
 
             services.AddScoped<IBootRepository, BootRepository>();
 
             services.AddScoped<IModuleRepository, ModuleRepository>();
 
+            services.AddScoped<IMessagingService, MessagingService>();
+
             services.AddScoped<ILocationRepository, LocationRepository>();
 
-            services.AddSwagger();
+            services.AddScoped<IUserRepository, UserRepository>();
+
+            services.AddCors(o => o.AddPolicy("MyPolicy", corsBuilder =>
+            {
+                corsBuilder.WithOrigins("http://localhost:4200").WithOrigins("https://testzone.kaluba.tech")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+            }));
 
             services.AddIdentity<ApplicationUser, IdentityRole>(option =>
             {
@@ -59,6 +72,8 @@ namespace SimplySecureApi.Web
                 option.Password.RequireUppercase = false;
             }).AddEntityFrameworkStores<SimplySecureDataContext>()
               .AddDefaultTokenProviders();
+
+
 
             services.AddAuthentication()
                 .AddJwtBearer(cfg =>
@@ -73,7 +88,8 @@ namespace SimplySecureApi.Web
                     };
                 });
 
-            services.AddMvc();
+            services.AddMvc( )
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddAuthorization(options => options.AddPolicy("Trusted", policy => policy.RequireClaim("DefaultUserClaim", "DefaultUserAuthorization")));
 
@@ -97,14 +113,13 @@ namespace SimplySecureApi.Web
                     app.UseExceptionHandler("/Home/Error");
                 }
 
+                app.UseCors("MyPolicy");
+
+                app.UseMiddleware<MaintainCorsHeadersMiddleware>();
+
                 app.UseStaticFiles();
 
                 app.UseAuthentication();
-
-                app.UseSwaggerUi(typeof(Startup).GetTypeInfo().Assembly, settings =>
-                {
-                    settings.GeneratorSettings.DefaultUrlTemplate = "{controller}/{action}/{id?}";
-                });
 
                 app.UseMvc(routes =>
                 {
