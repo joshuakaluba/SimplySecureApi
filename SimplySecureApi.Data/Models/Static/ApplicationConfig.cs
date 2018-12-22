@@ -27,5 +27,21 @@ namespace SimplySecureApi.Data.Models.Static
         public static string JwtTokenKey
             = Environment.GetEnvironmentVariable
                 ("SIMPLY_SECURE_API_JWT_KEY", target: EnvironmentVariableTarget.Process);
+
+        public static string TwilioAccountSId
+            = Environment.GetEnvironmentVariable
+                ("TWILIO_ACCOUNT_SID", target: EnvironmentVariableTarget.Process);
+
+        public static string TwilioAuthenticationToken
+            = Environment.GetEnvironmentVariable
+                ("TWILIO_AUTHENTICATION_TOKEN", target: EnvironmentVariableTarget.Process);
+
+        public static string TwilioSenderPhoneNumber
+            = Environment.GetEnvironmentVariable
+                ("TWILIO_SENDER_PHONENUMBER", target: EnvironmentVariableTarget.Process);
+
+        public static string TwilioRecipientPhoneNumber
+            = Environment.GetEnvironmentVariable
+                ("TWILIO_RECIPIENT_PHONENUMBER", target: EnvironmentVariableTarget.Process);
     }
 }
