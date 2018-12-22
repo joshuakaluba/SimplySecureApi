@@ -1,17 +1,19 @@
 ﻿@model IEnumerable<SimplySecureApi.Data.Models.Domain.Entity.Location>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Locations";
 }
 
-<h2>Index</h2>
+<h2 class="text-center">@ViewData["Title"]</h2>
+<hr />
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+@*<p>
+    <a asp-action="Create" class="btn btn-outline-primary my-2 my-sm-0" >Create New Location</a>
+</p>*@
+
 <table class="table">
     <thead>
-        <tr>
+        <tr style="background-color: #343A40; color: #fff;">
             <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
@@ -25,23 +27,34 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Armed)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsSilentAlarm)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            var style = item.Triggered ? "background-color: rgba(242, 120, 75, 0.3);" : "";
+
+            <tr class="border border-dark" style="@style;">
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Armed)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsSilentAlarm)
+                </td>
+
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Modify
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                            <a class="dropdown-item" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
