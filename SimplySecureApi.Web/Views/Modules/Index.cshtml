@@ -1,17 +1,21 @@
 ﻿@model IEnumerable<SimplySecureApi.Data.Models.Domain.Entity.Module>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Modules";
 }
 
-<h2>Index</h2>
+<h2 class="text-center">@ViewData["Title"]</h2>
+<hr />
+
+<p>Current Server Time: @System.DateTime.Now.ToString()</p>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-outline-primary my-2 my-sm-0">Create New Module</a>
 </p>
+
 <table class="table">
     <thead>
-        <tr>
+        <tr style="background-color: #343A40; color: #fff;">
             <th>
                 @Html.DisplayNameFor(model => model.Name)
             </th>
@@ -22,32 +26,74 @@
                 @Html.DisplayNameFor(model => model.IsMotionDetector)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.LastHeartbeat)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LastBoot)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Location)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.State)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsMotionDetector)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Location.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            var style = item.Offline ? "background-color: rgba(242, 120, 75, 0.3);" : "";
+
+            <tr class="border border-dark" style="@style;">
+                
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </a>
+                </td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">
+                        @Html.DisplayFor(modelItem => item.StateDisplayed)
+                    </a>
+                </td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">
+                        @Html.DisplayFor(modelItem => item.IsMotionDetector)
+                    </a>
+                </td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">
+                        @Html.DisplayFor(modelItem => item.RelativeLastHeartbeat)
+                    </a>
+                </td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">
+                        @Html.DisplayFor(modelItem => item.RelativeLastBoot)
+                    </a>
+                </td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">
+                        @Html.DisplayFor(modelItem => item.Location.Name)
+                    </a>
+                </td>
+
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Modify
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+
+                            <a class="dropdown-item" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                            <a class="dropdown-item" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
