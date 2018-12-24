@@ -3,27 +3,24 @@
 @inject UserManager<ApplicationUser> UserManager
 @if (SignInManager.IsSignedIn( User ))
 {
-    <li class="nav-item dropdown header-spacing">
+    @*<li class="nav-item dropdown header-spacing">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAccountMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             @UserManager.GetUserName( User )
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdownAccountMenuLink">
             <a class="dropdown-item" href="#" data-toggle="modal" data-target="#modal-logout">Log Out</a>
         </div>
-    </li>
+    </li>*@
 }
 else
 {
-    <li class="nav-item header-spacing">
+    @*<li class="nav-item header-spacing">
         <a asp-area="" class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
     </li>
     <li class="nav-item header-spacing">
         <a asp-area="" class="nav-link " asp-controller="Account" asp-action="Login">Log In</a>
-    </li>
+    </li>*@
 
 }
 
-    <script>
-
-
-    </script>
+   
