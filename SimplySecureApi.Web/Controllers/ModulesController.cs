@@ -68,6 +68,8 @@ namespace SimplySecureApi.Web.Controllers
                 {
                     module.Id = Guid.NewGuid();
 
+                    module.IsMotionDetector = false;
+
                     await _moduleRepository.CreateModule(module);
 
                     TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{module.Name} module created successfully.");
