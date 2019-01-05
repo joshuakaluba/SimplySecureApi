@@ -2,22 +2,22 @@
 
 namespace SimplySecureApi.Data.Migrations
 {
-    public partial class IsSilentAlarm : Migration
+    public partial class OfflineModules : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsSilentAlarm",
+            migrationBuilder.RenameColumn(
+                name: "Active",
                 table: "Modules",
-                nullable: false,
-                defaultValue: false);
+                newName: "Offline");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsSilentAlarm",
-                table: "Modules");
+            migrationBuilder.RenameColumn(
+                name: "Offline",
+                table: "Modules",
+                newName: "Active");
         }
     }
 }

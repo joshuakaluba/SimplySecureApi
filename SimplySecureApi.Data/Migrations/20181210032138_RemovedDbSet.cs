@@ -3,24 +3,27 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SimplySecureApi.Data.Migrations
 {
-    public partial class ModuleName : Migration
+    public partial class RemovedDbSet : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "Name",
-                table: "Modules",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.DropTable(
+                name: "ArmedModules");
 
+            migrationBuilder.DropTable(
+                name: "TriggeredModules");
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
             migrationBuilder.CreateTable(
                 name: "ArmedModules",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
                     DateCreated = table.Column<DateTime>(nullable: false),
-                    State = table.Column<bool>(nullable: false),
-                    ModuleId = table.Column<Guid>(nullable: false)
+                    ModuleId = table.Column<Guid>(nullable: false),
+                    State = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -39,8 +42,8 @@ namespace SimplySecureApi.Data.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     DateCreated = table.Column<DateTime>(nullable: false),
-                    State = table.Column<bool>(nullable: false),
-                    ModuleId = table.Column<Guid>(nullable: false)
+                    ModuleId = table.Column<Guid>(nullable: false),
+                    State = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -62,19 +65,6 @@ namespace SimplySecureApi.Data.Migrations
                 name: "IX_TriggeredModules_ModuleId",
                 table: "TriggeredModules",
                 column: "ModuleId");
-        }
-
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "ArmedModules");
-
-            migrationBuilder.DropTable(
-                name: "TriggeredModules");
-
-            migrationBuilder.DropColumn(
-                name: "Name",
-                table: "Modules");
         }
     }
 }

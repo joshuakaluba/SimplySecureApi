@@ -9,14 +9,14 @@ using SimplySecureApi.Data.DataContext;
 namespace SimplySecureApi.Data.Migrations
 {
     [DbContext(typeof(SimplySecureDataContext))]
-    [Migration("20181118201521_AddedModuleName")]
-    partial class AddedModuleName
+    [Migration("20181209183432_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.4-rtm-31024")
+                .HasAnnotation("ProductVersion", "2.2.0-rtm-35687")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -214,7 +214,7 @@ namespace SimplySecureApi.Data.Migrations
                     b.ToTable("BootMessages");
                 });
 
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.Module", b =>
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.Location", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
@@ -223,18 +223,44 @@ namespace SimplySecureApi.Data.Migrations
 
                     b.Property<DateTime>("DateCreated");
 
-                    b.Property<string>("Name");
+                    b.Property<bool>("IsSilentAlarm");
 
-                    b.Property<bool>("State");
+                    b.Property<string>("Name");
 
                     b.Property<bool>("Triggered");
 
                     b.HasKey("Id");
 
+                    b.ToTable("Locations");
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.Module", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("DateCreated");
+
+                    b.Property<bool>("IsMotionDetector");
+
+                    b.Property<DateTime>("LastBoot");
+
+                    b.Property<DateTime>("LastHeartbeat");
+
+                    b.Property<Guid>("LocationId");
+
+                    b.Property<string>("Name");
+
+                    b.Property<bool>("State");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationId");
+
                     b.ToTable("Modules");
                 });
 
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.ModuleStateChange", b =>
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.ModuleEvent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
@@ -249,7 +275,7 @@ namespace SimplySecureApi.Data.Migrations
 
                     b.HasIndex("ModuleId");
 
-                    b.ToTable("ModuleStateChanges");
+                    b.ToTable("ModuleEvents");
                 });
 
             modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.TriggeredModule", b =>
@@ -331,7 +357,15 @@ namespace SimplySecureApi.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.ModuleStateChange", b =>
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.Module", b =>
+                {
+                    b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.ModuleEvent", b =>
                 {
                     b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Module", "Module")
                         .WithMany()
