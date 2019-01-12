@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using SimplySecureApi.Common.Exception;
+using SimplySecureApi.Common.Extensions.Strings;
 using SimplySecureApi.Data.DataAccessLayer.Authentication;
+using SimplySecureApi.Data.DataAccessLayer.PushNotificationTokens;
 using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Models.Authentication;
-using SimplySecureApi.Data.Models.Response;
+using SimplySecureApi.Data.Models.Notification;
 using SimplySecureApi.Services.Authentication;
-using SimplySecureApi.Common.Extensions.Strings;
+using System;
+using System.Threading.Tasks;
 using TokenOptions = SimplySecureApi.Data.Models.Authentication.TokenOptions;
 
 namespace SimplySecureApi.Web.Controllers
@@ -22,10 +22,12 @@ namespace SimplySecureApi.Web.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly TokenOptions _tokenOptions;
         private readonly IUserRepository _userRepository;
+        private readonly IPushNotificationTokensRepository _pushNotificationTokensRepository;
 
         public AuthenticationController(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IUserRepository userRepository,
+            IPushNotificationTokensRepository pushNotificationTokensRepository,
             IOptions<TokenOptions> tokens,
             SimplySecureDataContext context)
             : base(userManager)
@@ -33,6 +35,7 @@ namespace SimplySecureApi.Web.Controllers
             _signInManager = signInManager;
             _userRepository = userRepository;
             _tokenOptions = tokens.Value;
+            _pushNotificationTokensRepository = pushNotificationTokensRepository;
         }
 
         [HttpPost]
@@ -106,6 +109,31 @@ namespace SimplySecureApi.Web.Controllers
                 var token = await TokenGenerator.Create(user, UserManager, _tokenOptions);
 
                 return Ok(token);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorMessage(ex));
+            }
+        }
+
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> RegisterPushNotifications([FromBody] PushNotificationModel model)
+        {
+            try
+            {
+                var user = await GetUser();
+
+                var pushNotificationToken = new PushNotificationToken
+                {
+                    Token = model.Token,
+
+                    ApplicationUserId = user.Id
+                };
+
+                await _pushNotificationTokensRepository.SavePushNotificationToken(pushNotificationToken);
+
+                return Ok(model);
             }
             catch (Exception ex)
             {
