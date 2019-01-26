@@ -13,6 +13,7 @@ using SimplySecureApi.Data.Models.Domain.ViewModels;
 using SimplySecureApi.Data.Models.Response;
 using System;
 using System.Diagnostics;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SimplySecureApi.Web.Controllers
@@ -38,7 +39,28 @@ namespace SimplySecureApi.Web.Controllers
         {
             try
             {
-                return RedirectToAction("Index", "Locations");
+                var html = @" <!doctype html>
+                        <html lang='en'>
+                          <head>
+                            <!-- Required meta tags -->
+                            <meta charset='utf-8'>
+                            <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
+                            <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css'>
+                            <title>SimplySecureApi</title>
+                          </head>
+                          <body>
+                            <div class='container'>
+                                <h1 class='text-center' style='padding-top:150px;'>The SimplySecureApi.Web server is running!</h1>
+
+                                
+                            </div>
+                            <script src='https://code.jquery.com/jquery-3.3.1.slim.min.js'></script>
+                            <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js'></script>
+                            <script src='https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js'></script>
+                          </body>
+                        </html>";
+
+                return Content(html, "text/html", Encoding.UTF8);
             }
             catch (Exception ex)
             {
