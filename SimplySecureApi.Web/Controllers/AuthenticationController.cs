@@ -140,5 +140,25 @@ namespace SimplySecureApi.Web.Controllers
                 return BadRequest(new ErrorMessage(ex));
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UnRegisterPushNotifications([FromBody] PushNotificationModel model)
+        {
+            try
+            {
+                var pushNotificationToken = new PushNotificationToken
+                {
+                    Token = model.Token
+                };
+
+                await _pushNotificationTokensRepository.RemovePushNotificationToken(pushNotificationToken);
+
+                return Ok(model);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorMessage(ex));
+            }
+        }
     }
 }
