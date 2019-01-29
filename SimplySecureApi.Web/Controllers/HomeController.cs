@@ -52,7 +52,6 @@ namespace SimplySecureApi.Web.Controllers
                             <div class='container'>
                                 <h1 class='text-center' style='padding-top:150px;'>The SimplySecureApi.Web server is running!</h1>
 
-                                
                             </div>
                             <script src='https://code.jquery.com/jquery-3.3.1.slim.min.js'></script>
                             <script src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js'></script>
@@ -124,10 +123,39 @@ namespace SimplySecureApi.Web.Controllers
                 }
 
                 location.Name = locationViewModel.Name.ToTitleCase();
-                location.Armed = locationViewModel.Armed;
                 location.IsSilentAlarm = locationViewModel.IsSilentAlarm;
 
                 await _locationRepository.UpdateLocation(location);
+
+                return Ok(location);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
+
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> ArmLocation([FromBody] LocationViewModel locationViewModel)
+        {
+            try
+            {
+                var location = await _locationRepository.FindLocationById(locationViewModel.Id);
+
+                if (location == null)
+                {
+                    return BadRequest(new ErrorMessage("Unable to find location."));
+                }
+
+                if (locationViewModel.Armed)
+                {
+                    await _locationRepository.ArmLocation(location);
+                }
+                else
+                {
+                    await _locationRepository.DisarmLocation(location);
+                }
 
                 return Ok(location);
             }
