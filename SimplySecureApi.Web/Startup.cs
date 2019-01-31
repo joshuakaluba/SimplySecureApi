@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using SimplySecureApi.Data.DataAccessLayer.Authentication;
 using SimplySecureApi.Data.DataAccessLayer.Locations;
+using SimplySecureApi.Data.DataAccessLayer.LocationUsers;
+using SimplySecureApi.Data.DataAccessLayer.PushNotificationTokens;
 using SimplySecureApi.Data.Services.Messaging;
 using SimplySecureApi.Web.MiddleWare;
 using TokenOptions = SimplySecureApi.Data.Models.Authentication.TokenOptions;
@@ -46,11 +48,15 @@ namespace SimplySecureApi.Web
 
             services.AddScoped<IBootRepository, BootRepository>();
 
+            services.AddScoped<IPushNotificationTokensRepository, PushNotificationTokensRepository>();
+
             services.AddScoped<IModuleRepository, ModuleRepository>();
 
             services.AddScoped<IMessagingService, MessagingService>();
 
             services.AddScoped<ILocationRepository, LocationRepository>();
+
+            services.AddScoped<ILocationUsersRepository, LocationUsersRepository>();
 
             services.AddScoped<IUserRepository, UserRepository>();
 
