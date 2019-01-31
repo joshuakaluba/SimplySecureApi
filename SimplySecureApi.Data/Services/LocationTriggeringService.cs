@@ -3,12 +3,17 @@ using SimplySecureApi.Data.Models.Domain.Entity;
 using SimplySecureApi.Data.Models.Response;
 using SimplySecureApi.Data.Services.Messaging;
 using System.Threading.Tasks;
+using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
 
 namespace SimplySecureApi.Data.Services
 {
     public class LocationTriggeringService
     {
-        public static async Task<ModuleResponse> DetermineIfTriggering(ILocationRepository locationRepository, IMessagingService messagingService, Module module)
+        public static async Task<ModuleResponse> DetermineIfTriggering(
+            ILocationRepository locationRepository,
+            ILocationActionEventsRepository locationActionEventsRepository,
+            IMessagingService messagingService, 
+            Module module)
         {
             var location = module.Location;
 
@@ -19,6 +24,15 @@ namespace SimplySecureApi.Data.Services
                 await locationRepository.TriggerLocation(location);
 
                 await messagingService.SendModuleTriggeredMessage(module);
+
+                var locationActionEvent = new LocationActionEvent
+                {
+                    LocationId = location.Id,
+
+                    Action = LocationActionEnum.Triggered
+                };
+
+                await locationActionEventsRepository.SaveLocationActionEvent(locationActionEvent);
 
                 triggeredFlag = true;
             }
