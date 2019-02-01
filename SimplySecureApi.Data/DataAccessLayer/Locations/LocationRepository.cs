@@ -1,5 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
+using SimplySecureApi.Data.DataAccessLayer.LocationUsers;
 using SimplySecureApi.Data.DataContext;
+using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Domain.Entity;
 using System;
 using System.Collections.Generic;
@@ -10,13 +13,22 @@ namespace SimplySecureApi.Data.DataAccessLayer.Locations
 {
     public class LocationRepository : BaseRepository, ILocationRepository
     {
-        public async Task CreateLocation(Location location)
+        public async Task CreateLocation(ILocationUsersRepository locationUsersRepository, Location location)
         {
             using (DataContext = new SimplySecureDataContext())
             {
                 DataContext.Locations.Add(location);
 
                 await DataContext.SaveChangesAsync();
+
+                var locationUser = new LocationUser
+                {
+                    LocationId = location.Id,
+
+                    ApplicationUserId = location.ApplicationUserId
+                };
+
+                await locationUsersRepository.CreateLocationUser(locationUser);
             }
         }
 
@@ -32,7 +44,7 @@ namespace SimplySecureApi.Data.DataAccessLayer.Locations
             }
         }
 
-        public async Task ArmLocation(Location location)
+        public async Task ArmLocation(Location location, ApplicationUser user, ILocationActionEventsRepository locationActionEventsRepository)
         {
             using (DataContext = new SimplySecureDataContext())
             {
@@ -43,10 +55,21 @@ namespace SimplySecureApi.Data.DataAccessLayer.Locations
                 DataContext.Locations.Update(location);
 
                 await DataContext.SaveChangesAsync();
+
+                var locationAction = new LocationActionEvent
+                {
+                    ApplicationUserId = user.Id,
+
+                    Action = LocationActionEnum.Armed,
+
+                    LocationId = location.Id
+                };
+
+                await locationActionEventsRepository.SaveLocationActionEvent(locationAction);
             }
         }
 
-        public async Task DisarmLocation(Location location)
+        public async Task DisarmLocation(Location location, ApplicationUser user, ILocationActionEventsRepository locationActionEventsRepository)
         {
             using (DataContext = new SimplySecureDataContext())
             {
@@ -57,6 +80,17 @@ namespace SimplySecureApi.Data.DataAccessLayer.Locations
                 DataContext.Locations.Update(location);
 
                 await DataContext.SaveChangesAsync();
+
+                var locationAction = new LocationActionEvent
+                {
+                    ApplicationUserId = user.Id,
+
+                    Action = LocationActionEnum.Disarmed,
+
+                    LocationId = location.Id
+                };
+
+                await locationActionEventsRepository.SaveLocationActionEvent(locationAction);
             }
         }
 
@@ -80,17 +114,30 @@ namespace SimplySecureApi.Data.DataAccessLayer.Locations
             }
         }
 
-        public async Task<List<Location>> GetLocations()
+        public async Task<List<Location>> GetLocationsForUser(ApplicationUser user)
         {
             using (DataContext = new SimplySecureDataContext())
             {
-                var locations
-                    = await DataContext.Locations
-                        .OrderBy(l => l.Name)
-                            .ToListAsync();
-
+                var locations =
+                    await DataContext.LocationUsers
+                            .Where(m => m.ApplicationUserId == user.Id)
+                                .Select(m => m.Location)
+                                    .ToListAsync();
                 return locations;
             }
+        }
+
+        public async Task ValidateLocationForUser(ApplicationUser user, Location location)
+        {
+            var userLocations = await GetLocationsForUser(user);
+
+            var found = userLocations.Any(l => l.Id == location.Id);
+
+            if (found == false)
+            {
+                throw new Exception("User is not authorized for current location");
+            }
+
         }
 
         public async Task UpdateLocation(Location location)
