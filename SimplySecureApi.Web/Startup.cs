@@ -15,6 +15,7 @@ using SimplySecureApi.Data.Models.Static;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using SimplySecureApi.Data.DataAccessLayer.Authentication;
+using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
 using SimplySecureApi.Data.DataAccessLayer.Locations;
 using SimplySecureApi.Data.DataAccessLayer.LocationUsers;
 using SimplySecureApi.Data.DataAccessLayer.PushNotificationTokens;
@@ -57,6 +58,8 @@ namespace SimplySecureApi.Web
             services.AddScoped<ILocationRepository, LocationRepository>();
 
             services.AddScoped<ILocationUsersRepository, LocationUsersRepository>();
+
+            services.AddScoped<ILocationActionEventsRepository, LocationActionEventsRepository>();
 
             services.AddScoped<IUserRepository, UserRepository>();
 
