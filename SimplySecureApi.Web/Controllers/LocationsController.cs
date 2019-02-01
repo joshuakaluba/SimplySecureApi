@@ -1,160 +1,171 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using SimplySecureApi.Data.DataAccessLayer.Locations;
-using SimplySecureApi.Data.Models.Authentication;
-using SimplySecureApi.Data.Models.Domain.Entity;
-using SimplySecureApi.Data.Models.Response;
-using System;
-using System.Threading.Tasks;
+﻿//using Microsoft.AspNetCore.Identity;
+//using Microsoft.AspNetCore.Mvc;
+//using SimplySecureApi.Data.DataAccessLayer.Locations;
+//using SimplySecureApi.Data.Models.Authentication;
+//using SimplySecureApi.Data.Models.Domain.Entity;
+//using SimplySecureApi.Data.Models.Response;
+//using System;
+//using System.Threading.Tasks;
+//using Microsoft.AspNetCore.Authorization;
+//using SimplySecureApi.Data.DataAccessLayer.LocationUsers;
 
-namespace SimplySecureApi.Web.Controllers
-{
-    public class LocationsController : BaseController
-    {
-        private readonly ILocationRepository _locationRepository;
+//namespace SimplySecureApi.Web.Controllers
+//{
+//    [Authorize(Roles = "User")]
+//    public class LocationsController : BaseController
+//    {
+//        private readonly ILocationRepository _locationRepository;
+//        private readonly ILocationUsersRepository _locationUsersRepository;
 
-        public LocationsController(UserManager<ApplicationUser> userManager, ILocationRepository locationRepository)
-            : base(userManager)
-        {
-            _locationRepository = locationRepository;
-        }
+//        public LocationsController(UserManager<ApplicationUser> userManager, 
+//            ILocationRepository locationRepository,
+//            ILocationUsersRepository locationUsersRepository)
+//            : base(userManager)
+//        {
+//            _locationRepository = locationRepository;
+//            _locationUsersRepository = locationUsersRepository;
+//        }
 
-        public async Task<IActionResult> Index()
-        {
-            try
-            {
-                var locations
-                    = await _locationRepository.GetLocations();
+//        public async Task<IActionResult> Index()
+//        {
+//            try
+//            {
+//                var locations
+//                    = await _locationRepository.GetLocationsForUser();
 
-                return View(locations);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
+//                return View(locations);
+//            }
+//            catch (Exception ex)
+//            {
+//                TempData["ErrorMessage"] = ex.Message;
 
-                return RedirectToAction("Error", "Home");
-            }
-        }
+//                return RedirectToAction("Error", "Home");
+//            }
+//        }
 
-        public IActionResult Create()
-        {
-            try
-            {
-                return View();
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
+//        public IActionResult Create()
+//        {
+//            try
+//            {
+//                return View();
+//            }
+//            catch (Exception ex)
+//            {
+//                TempData["ErrorMessage"] = ex.Message;
 
-                return RedirectToAction("Error", "Home");
-            }
-        }
+//                return RedirectToAction("Error", "Home");
+//            }
+//        }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,IsSilentAlarm")] Location location)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    location.Id = Guid.NewGuid();
-                    location.Armed = false;
-                    location.Triggered = false;
-                    location.Active = true;
+//        [HttpPost]
+//        [ValidateAntiForgeryToken]
+//        public async Task<IActionResult> Create([Bind("Name,IsSilentAlarm")] Location location)
+//        {
+//            try
+//            {
+//                if (ModelState.IsValid)
+//                {
+//                    location.Id = Guid.NewGuid();
+//                    //location.Armed = false;
+//                    //location.Triggered = false;
+//                    location.Active = true;
 
-                    await _locationRepository.CreateLocation(location);
+//                    var user = await base.GetUser();
 
-                    TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{location.Name} created successfully.");
+//                    location.ApplicationUserId = user.Id;
 
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(location);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
+//                    await _locationRepository.CreateLocation(_locationUsersRepository, location);
 
-                return RedirectToAction("Error", "Home");
-            }
-        }
+//                    TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{location.Name} created successfully.");
 
-        public async Task<IActionResult> Edit(Guid? id)
-        {
-            try
-            {
-                if (id == null)
-                {
-                    return NotFound();
-                }
+//                    return RedirectToAction(nameof(Index));
+//                }
+//                return View(location);
+//            }
+//            catch (Exception ex)
+//            {
+//                TempData["ErrorMessage"] = ex.Message;
 
-                var location
-                    = await _locationRepository.FindLocationById((Guid)id);
+//                return RedirectToAction("Error", "Home");
+//            }
+//        }
 
-                if (location == null)
-                {
-                    return NotFound();
-                }
+//        public async Task<IActionResult> Edit(Guid? id)
+//        {
+//            try
+//            {
+//                if (id == null)
+//                {
+//                    return NotFound();
+//                }
 
-                return View(location);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
+//                var location
+//                    = await _locationRepository.GetLocationById((Guid)id);
 
-                return RedirectToAction("Error", "Home");
-            }
-        }
+//                if (location == null)
+//                {
+//                    return NotFound();
+//                }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Armed,IsSilentAlarm,Id")] Location location)
-        {
-            try
-            {
-                if (id != location.Id)
-                {
-                    return NotFound();
-                }
+//                return View(location);
+//            }
+//            catch (Exception ex)
+//            {
+//                TempData["ErrorMessage"] = ex.Message;
 
-                if (ModelState.IsValid)
-                {
-                    var armed = location.Armed;
+//                return RedirectToAction("Error", "Home");
+//            }
+//        }
 
-                    var dbLocation = await _locationRepository.FindLocationById(location.Id);
+//        [HttpPost]
+//        [ValidateAntiForgeryToken]
+//        public async Task<IActionResult> Edit(Guid id, [Bind("Armed,IsSilentAlarm,Id")] Location location)
+//        {
+//            try
+//            {
+//                if (id != location.Id)
+//                {
+//                    return NotFound();
+//                }
 
-                    if (dbLocation != null)
-                    {
-                        dbLocation.IsSilentAlarm = location.IsSilentAlarm;
+//                if (ModelState.IsValid)
+//                {
+//                    var armed = location.Armed;
 
-                        if (armed)
-                        {
-                            await _locationRepository.ArmLocation(dbLocation);
+//                    var dbLocation = await _locationRepository.GetLocationById(location.Id);
 
-                            TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{dbLocation.Name} successfully armed.");
-                        }
-                        else
-                        {
-                            await _locationRepository.DisarmLocation(dbLocation);
+//                    if (dbLocation != null)
+//                    {
+//                        dbLocation.IsSilentAlarm = location.IsSilentAlarm;
 
-                            TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{dbLocation.Name} successfully disarmed.");
-                        }
-                    }
-                    else
-                    {
-                        return NotFound();
-                    }
+//                        if (armed)
+//                        {
+//                            await _locationRepository.ArmLocation(dbLocation);
 
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(location);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = ex.Message;
+//                            TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{dbLocation.Name} successfully armed.");
+//                        }
+//                        else
+//                        {
+//                            await _locationRepository.DisarmLocation(dbLocation);
 
-                return RedirectToAction("Error", "Home");
-            }
-        }
-    }
-}
+//                            TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{dbLocation.Name} successfully disarmed.");
+//                        }
+//                    }
+//                    else
+//                    {
+//                        return NotFound();
+//                    }
+
+//                    return RedirectToAction(nameof(Index));
+//                }
+//                return View(location);
+//            }
+//            catch (Exception ex)
+//            {
+//                TempData["ErrorMessage"] = ex.Message;
+
+//                return RedirectToAction("Error", "Home");
+//            }
+//        }
+//    }
+//}

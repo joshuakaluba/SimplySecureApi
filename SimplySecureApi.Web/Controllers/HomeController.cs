@@ -15,6 +15,8 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
+using SimplySecureApi.Data.DataAccessLayer.LocationUsers;
 
 namespace SimplySecureApi.Web.Controllers
 {
@@ -23,16 +25,26 @@ namespace SimplySecureApi.Web.Controllers
         private readonly IModuleEventRepository _moduleEventRepository;
         private readonly ILocationRepository _locationRepository;
         private readonly IModuleRepository _moduleRepository;
+        private readonly ILocationUsersRepository _locationUsersRepository;
+        private readonly ILocationActionEventsRepository _locationActionEventsRepository;
 
         public HomeController(UserManager<ApplicationUser> userManager,
             IModuleEventRepository moduleEventRepository,
             IModuleRepository moduleRepository,
+            ILocationUsersRepository locationUsersRepository,
+            ILocationActionEventsRepository locationActionEventsRepository,
             ILocationRepository locationRepository)
             : base(userManager)
         {
             _moduleEventRepository = moduleEventRepository;
+
             _locationRepository = locationRepository;
+
             _moduleRepository = moduleRepository;
+
+            _locationActionEventsRepository = locationActionEventsRepository;
+
+            _locationUsersRepository = locationUsersRepository;
         }
 
         public IActionResult Index()
@@ -86,22 +98,137 @@ namespace SimplySecureApi.Web.Controllers
             }
         }
 
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> GetModuleEventsByLocation(Guid id)
+        {
+            try
+            {
+                var location = await _locationRepository.GetLocationById(id);
+
+                var moduleEvents
+                    = await _moduleEventRepository.GetModuleEventsByLocation(location);
+
+                return Ok(moduleEvents);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
+
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> GetLocationUsers(Guid id)
+        {
+            try
+            {
+                var location = await _locationRepository.GetLocationById(id);
+
+                var user = await GetUser();
+
+                await _locationRepository.ValidateLocationForUser(user, location);
+                
+                var locationUsers 
+                    = await _locationUsersRepository.GetLocationUsers(location);
+                
+                return Ok(locationUsers);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Ping()
+        {
+            return Ok();
+        }
+
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
         public async Task<IActionResult> CreateNewLocation([FromBody] LocationViewModel locationViewModel)
         {
             try
             {
+                var user = await GetUser();
+
                 var location = new Location
                 {
                     Id = new Guid(),
                     Name = locationViewModel.Name.ToTitleCase(),
-                    IsSilentAlarm = locationViewModel.IsSilentAlarm
+                    IsSilentAlarm = locationViewModel.IsSilentAlarm,
+                    ApplicationUserId = user.Id
                 };
 
-                await _locationRepository.CreateLocation(location);
+                await _locationRepository.CreateLocation(_locationUsersRepository,location);
 
                 return Ok(location);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
+
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> CreateNewModule([FromBody] ModuleViewModel moduleViewModel)
+        {
+            try
+            {
+                var user = await GetUser();
+
+                var location = await _locationRepository.GetLocationById(moduleViewModel.LocationId);
+
+                if (location.CheckUserAdmin(user) == false)
+                {
+                    return BadRequest(new ErrorMessage("You are unauthorized to add new modules at this location. Only admins can add new modules"));
+                }
+
+                var module = new Module
+                {
+                    LocationId = moduleViewModel.LocationId,
+                    Name = moduleViewModel.Name,
+                    IsMotionDetector = moduleViewModel.IsMotionDetector
+                };
+
+                await _moduleRepository.CreateModule(module);
+
+                return Ok(moduleViewModel);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
+
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> CreateNewLocationUser([FromBody] LocationUserViewModel locationUserViewModel)
+        {
+            try
+            {
+                var user = await GetUser();
+
+                var location = await _locationRepository.GetLocationById(locationUserViewModel.LocationId);
+
+                if (location.CheckUserAdmin(user) == false)
+                {
+                    return BadRequest(new ErrorMessage("You are unauthorized to add new users at this location. Only admins can add new users"));
+                }
+
+                var userToAdd = await UserManager.FindByEmailAsync(locationUserViewModel.Email);
+
+                if (userToAdd == null)
+                {
+                    return BadRequest(new ErrorMessage("Unable to find user. Please have your user register"));
+                }
+
+                await _locationUsersRepository.CreateLocationUser(location, userToAdd);
+                
+                return Ok(userToAdd);
             }
             catch (Exception ex)
             {
@@ -115,12 +242,7 @@ namespace SimplySecureApi.Web.Controllers
         {
             try
             {
-                var location = await _locationRepository.FindLocationById(locationViewModel.Id);
-
-                if (location == null)
-                {
-                    return BadRequest(new ErrorMessage("Unable to find location."));
-                }
+                var location = await _locationRepository.GetLocationById(locationViewModel.Id);
 
                 location.Name = locationViewModel.Name.ToTitleCase();
                 location.IsSilentAlarm = locationViewModel.IsSilentAlarm;
@@ -141,20 +263,19 @@ namespace SimplySecureApi.Web.Controllers
         {
             try
             {
-                var location = await _locationRepository.FindLocationById(locationViewModel.Id);
+                var location = await _locationRepository.GetLocationById(locationViewModel.Id);
 
-                if (location == null)
-                {
-                    return BadRequest(new ErrorMessage("Unable to find location."));
-                }
+                var user = await GetUser();
+
+                await _locationRepository.ValidateLocationForUser(user, location);
 
                 if (locationViewModel.Armed)
                 {
-                    await _locationRepository.ArmLocation(location);
+                    await _locationRepository.ArmLocation(location, user, _locationActionEventsRepository);
                 }
                 else
                 {
-                    await _locationRepository.DisarmLocation(location);
+                    await _locationRepository.DisarmLocation(location, user, _locationActionEventsRepository);
                 }
 
                 return Ok(location);
@@ -171,7 +292,9 @@ namespace SimplySecureApi.Web.Controllers
         {
             try
             {
-                var locations = await _locationRepository.GetLocations();
+                var user = await GetUser();
+
+                var locations = await _locationRepository.GetLocationsForUser(user);
 
                 return Ok(locations);
             }
@@ -188,14 +311,33 @@ namespace SimplySecureApi.Web.Controllers
             try
             {
                 var location
-                    = await _locationRepository.FindLocationById(id);
-
-                if (location == null)
-                {
-                    return BadRequest(new ErrorMessage("Unable to find location."));
-                }
+                    = await _locationRepository.GetLocationById(id);
 
                 return Ok(location);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
+
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> GetLocationHistory(Guid id)
+        {
+            try
+            {
+                var location
+                    = await _locationRepository.GetLocationById(id);
+
+                var user = await GetUser();
+
+                await _locationRepository.ValidateLocationForUser(user, location);
+
+                var events 
+                    = await _locationActionEventsRepository.GetLocationActionEventsByLocation(location);
+
+                return Ok(events);
             }
             catch (Exception ex)
             {
@@ -210,12 +352,7 @@ namespace SimplySecureApi.Web.Controllers
             try
             {
                 var location
-                    = await _locationRepository.FindLocationById(id);
-
-                if (location == null)
-                {
-                    return BadRequest(new ErrorMessage("Unable to find location."));
-                }
+                    = await _locationRepository.GetLocationById(id);
 
                 var modules
                     = await _moduleRepository
@@ -236,11 +373,13 @@ namespace SimplySecureApi.Web.Controllers
             try
             {
                 var location
-                    = await _locationRepository.FindLocationById(id);
+                    = await _locationRepository.GetLocationById(id);
 
-                if (location == null)
+                var user = await GetUser();
+
+                if (!location.CheckUserAdmin(user))
                 {
-                    return BadRequest(new ErrorMessage("Unable to find location."));
+                    return BadRequest(new ErrorMessage("You are unauthorized to modify this location. Only admin can add modify this location"));
                 }
 
                 await _locationRepository.DeleteLocation(location);
@@ -251,6 +390,78 @@ namespace SimplySecureApi.Web.Controllers
             {
                 return BadRequest(new ErrorResponse(ex));
             }
+        }
+
+        [HttpDelete]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> DeleteLocationUser(Guid id)
+        {
+            try
+            {
+                var locationUser
+                    = await _locationUsersRepository.FindLocationUser(id);
+
+                if (locationUser == null)
+                {
+                    return BadRequest(new ErrorMessage("Unable to find location user."));
+                }
+
+                if (locationUser.ApplicationUserId == locationUser.Location.ApplicationUserId)
+                {
+                    return BadRequest(new ErrorMessage($"You can not delete the location admin"));
+                }
+
+                var user = await GetUser();
+
+                if (locationUser.Location.CheckUserAdmin(user) == false)
+                {
+                    return BadRequest(new ErrorMessage("You are unauthorized to modify users at this location. Only admins can modify users"));
+                }
+
+                await _locationUsersRepository.DeleteLocationUser(locationUser);
+
+                return Ok(id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
+
+        [HttpDelete]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> DeleteModule(Guid id)
+        {
+            try
+            {
+                var module
+                    = await NewMethod(id);
+
+                if (module == null)
+                {
+                    return BadRequest(new ErrorMessage("Unable to find module."));
+                }
+
+                var user = await GetUser();
+
+                if (module.Location.CheckUserAdmin(user) == false)
+                {
+                    return BadRequest(new ErrorMessage("You are unauthorized to modify users at this location. Only admins can modify modules"));
+                }
+
+                await _moduleRepository.DeleteModule(module);
+
+                return Ok(id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
+
+        private Task<Module> NewMethod(Guid id)
+        {
+            return _moduleRepository.FindModule(id);
         }
 
         public IActionResult Error()

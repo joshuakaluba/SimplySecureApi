@@ -10,6 +10,7 @@ using SimplySecureApi.Data.Models.Response;
 using SimplySecureApi.Data.Services;
 using System;
 using System.Threading.Tasks;
+using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
 using SimplySecureApi.Data.Services.Messaging;
 
 namespace SimplySecureApi.Web.Controllers
@@ -23,8 +24,15 @@ namespace SimplySecureApi.Web.Controllers
         private readonly IModuleEventRepository _moduleEventRepository;
         private readonly ILocationRepository _locationRepository;
         private readonly IMessagingService _messagingService;
+        private readonly ILocationActionEventsRepository _locationActionEventsRepository;
 
-        public ModuleEventsController(UserManager<ApplicationUser> userManager, IModuleRepository moduleRepository, IModuleEventRepository moduleEventRepository, ILocationRepository locationRepository, IMessagingService messagingService)
+        public ModuleEventsController(
+            UserManager<ApplicationUser> userManager, 
+            IModuleRepository moduleRepository, 
+            IModuleEventRepository moduleEventRepository, 
+            ILocationRepository locationRepository, 
+            IMessagingService messagingService, 
+            ILocationActionEventsRepository locationActionEventsRepository)
             : base(userManager)
         {
             _moduleRepository = moduleRepository;
@@ -32,6 +40,8 @@ namespace SimplySecureApi.Web.Controllers
             _moduleEventRepository = moduleEventRepository;
 
             _locationRepository = locationRepository;
+
+            _locationActionEventsRepository = locationActionEventsRepository;
 
             _messagingService = messagingService;
         }
@@ -59,7 +69,7 @@ namespace SimplySecureApi.Web.Controllers
 
                 var moduleResponse
                     = await LocationTriggeringService
-                        .DetermineIfTriggering(_locationRepository, _messagingService, module);
+                        .DetermineIfTriggering(_locationRepository, _locationActionEventsRepository, _messagingService, module);
 
                 return Ok(moduleResponse);
             }

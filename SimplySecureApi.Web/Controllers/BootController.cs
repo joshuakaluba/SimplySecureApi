@@ -10,6 +10,7 @@ using SimplySecureApi.Data.Models.Response;
 using SimplySecureApi.Data.Services;
 using System;
 using System.Threading.Tasks;
+using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
 using SimplySecureApi.Data.Services.Messaging;
 
 namespace SimplySecureApi.Web.Controllers
@@ -22,9 +23,16 @@ namespace SimplySecureApi.Web.Controllers
         private readonly IBootRepository _bootRepository;
         private readonly IModuleRepository _moduleRepository;
         private readonly ILocationRepository _locationRepository;
+        private readonly ILocationActionEventsRepository _locationActionEventsRepository;
         private readonly IMessagingService _messagingService;
 
-        public BootController(UserManager<ApplicationUser> userManager, IBootRepository bootRepository, IModuleRepository moduleRepository, ILocationRepository locationRepository, IMessagingService messagingService)
+        public BootController(
+            UserManager<ApplicationUser> userManager, 
+            IBootRepository bootRepository, 
+            IModuleRepository moduleRepository,
+            ILocationRepository locationRepository, 
+            IMessagingService messagingService, 
+            ILocationActionEventsRepository locationActionEventsRepository)
             : base(userManager)
         {
             _bootRepository = bootRepository;
@@ -32,6 +40,8 @@ namespace SimplySecureApi.Web.Controllers
             _moduleRepository = moduleRepository;
 
             _locationRepository = locationRepository;
+
+            _locationActionEventsRepository = locationActionEventsRepository;
 
             _messagingService = messagingService;
         }
@@ -56,7 +66,7 @@ namespace SimplySecureApi.Web.Controllers
 
                 var moduleResponse
                     = await LocationTriggeringService
-                        .DetermineIfTriggering(_locationRepository, _messagingService, module);
+                        .DetermineIfTriggering(_locationRepository, _locationActionEventsRepository, _messagingService, module);
 
                 module.State = bootViewModel.State;
 
