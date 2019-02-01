@@ -26,9 +26,7 @@ namespace SimplySecureApi.Tests
             var location = new Location
             {
                 Name = "Test Location",
-                Armed = true,
-                IsSilentAlarm = false,
-                Triggered = false
+                IsSilentAlarm = false
             };
 
             var module = new Module
