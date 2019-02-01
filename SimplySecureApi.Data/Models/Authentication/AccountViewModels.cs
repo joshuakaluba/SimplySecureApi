@@ -17,6 +17,12 @@ namespace SimplySecureApi.Data.Models.Authentication
         public string Email { get; set; }
     }
 
+    public class PushNotificationModel
+    {
+        [Required]
+        public string Token { get; set; }
+    }
+
     public class LoginViewModel
     {
         [Required]

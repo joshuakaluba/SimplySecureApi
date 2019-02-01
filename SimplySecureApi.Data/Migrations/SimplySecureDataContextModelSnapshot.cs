@@ -205,6 +205,8 @@ namespace SimplySecureApi.Data.Migrations
 
                     b.Property<bool>("Active");
 
+                    b.Property<string>("ApplicationUserId");
+
                     b.Property<bool>("Armed");
 
                     b.Property<DateTime>("DateCreated");
@@ -217,7 +219,51 @@ namespace SimplySecureApi.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ApplicationUserId");
+
                     b.ToTable("Locations");
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.LocationActionEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Action");
+
+                    b.Property<string>("ApplicationUserId");
+
+                    b.Property<DateTime>("DateCreated");
+
+                    b.Property<Guid>("LocationId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("LocationActionEvents");
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.LocationUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ApplicationUserId");
+
+                    b.Property<DateTime>("DateCreated");
+
+                    b.Property<Guid>("LocationId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("LocationUsers");
                 });
 
             modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.Module", b =>
@@ -264,6 +310,26 @@ namespace SimplySecureApi.Data.Migrations
                     b.HasIndex("ModuleId");
 
                     b.ToTable("ModuleEvents");
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Notification.PushNotificationToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("Active");
+
+                    b.Property<string>("ApplicationUserId");
+
+                    b.Property<DateTime>("DateCreated");
+
+                    b.Property<string>("Token");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("PushNotificationTokens");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -319,6 +385,37 @@ namespace SimplySecureApi.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.Location", b =>
+                {
+                    b.HasOne("SimplySecureApi.Data.Models.Authentication.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId");
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.LocationActionEvent", b =>
+                {
+                    b.HasOne("SimplySecureApi.Data.Models.Authentication.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.LocationUser", b =>
+                {
+                    b.HasOne("SimplySecureApi.Data.Models.Authentication.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.Module", b =>
                 {
                     b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Location", "Location")
@@ -333,6 +430,13 @@ namespace SimplySecureApi.Data.Migrations
                         .WithMany()
                         .HasForeignKey("ModuleId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Notification.PushNotificationToken", b =>
+                {
+                    b.HasOne("SimplySecureApi.Data.Models.Authentication.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId");
                 });
 #pragma warning restore 612, 618
         }

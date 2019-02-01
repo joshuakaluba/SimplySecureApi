@@ -41,27 +41,13 @@ namespace SimplySecureApi.Data.Migrations
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
-                    DateCreated = table.Column<DateTime>(nullable: false)
+                    DateCreated = table.Column<DateTime>(nullable: false),
+                    FullName = table.Column<string>(nullable: true),
+                    Active = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Locations",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    DateCreated = table.Column<DateTime>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Armed = table.Column<bool>(nullable: false),
-                    IsSilentAlarm = table.Column<bool>(nullable: false),
-                    Triggered = table.Column<bool>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Locations", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -171,6 +157,51 @@ namespace SimplySecureApi.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Locations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    DateCreated = table.Column<DateTime>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    Armed = table.Column<bool>(nullable: false),
+                    IsSilentAlarm = table.Column<bool>(nullable: false),
+                    Triggered = table.Column<bool>(nullable: false),
+                    Active = table.Column<bool>(nullable: false),
+                    ApplicationUserId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Locations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Locations_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PushNotificationTokens",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    DateCreated = table.Column<DateTime>(nullable: false),
+                    Token = table.Column<string>(nullable: true),
+                    Active = table.Column<bool>(nullable: false),
+                    ApplicationUserId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PushNotificationTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PushNotificationTokens_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Modules",
                 columns: table => new
                 {
@@ -181,6 +212,7 @@ namespace SimplySecureApi.Data.Migrations
                     IsMotionDetector = table.Column<bool>(nullable: false),
                     LastHeartbeat = table.Column<DateTime>(nullable: false),
                     LastBoot = table.Column<DateTime>(nullable: false),
+                    Offline = table.Column<bool>(nullable: false),
                     LocationId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
@@ -190,26 +222,6 @@ namespace SimplySecureApi.Data.Migrations
                         name: "FK_Modules_Locations_LocationId",
                         column: x => x.LocationId,
                         principalTable: "Locations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ArmedModules",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    DateCreated = table.Column<DateTime>(nullable: false),
-                    State = table.Column<bool>(nullable: false),
-                    ModuleId = table.Column<Guid>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ArmedModules", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ArmedModules_Modules_ModuleId",
-                        column: x => x.ModuleId,
-                        principalTable: "Modules",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -254,31 +266,6 @@ namespace SimplySecureApi.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "TriggeredModules",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    DateCreated = table.Column<DateTime>(nullable: false),
-                    State = table.Column<bool>(nullable: false),
-                    ModuleId = table.Column<Guid>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TriggeredModules", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TriggeredModules_Modules_ModuleId",
-                        column: x => x.ModuleId,
-                        principalTable: "Modules",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ArmedModules_ModuleId",
-                table: "ArmedModules",
-                column: "ModuleId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -322,6 +309,11 @@ namespace SimplySecureApi.Data.Migrations
                 column: "ModuleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Locations_ApplicationUserId",
+                table: "Locations",
+                column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ModuleEvents_ModuleId",
                 table: "ModuleEvents",
                 column: "ModuleId");
@@ -332,16 +324,13 @@ namespace SimplySecureApi.Data.Migrations
                 column: "LocationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TriggeredModules_ModuleId",
-                table: "TriggeredModules",
-                column: "ModuleId");
+                name: "IX_PushNotificationTokens_ApplicationUserId",
+                table: "PushNotificationTokens",
+                column: "ApplicationUserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "ArmedModules");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -364,19 +353,19 @@ namespace SimplySecureApi.Data.Migrations
                 name: "ModuleEvents");
 
             migrationBuilder.DropTable(
-                name: "TriggeredModules");
+                name: "PushNotificationTokens");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Modules");
 
             migrationBuilder.DropTable(
                 name: "Locations");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }

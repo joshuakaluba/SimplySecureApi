@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
 
 namespace SimplySecureApi.Data.DataAccessLayer.Modules
 {
@@ -96,7 +97,11 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
             }
         }
 
-        public async Task UpdateModuleHeartbeats(List<ModuleViewModel> modulesViewModels, ILocationRepository locationRepository, IMessagingService messagingService)
+        public async Task UpdateModuleHeartbeats(
+            List<ModuleViewModel> modulesViewModels, 
+            ILocationRepository locationRepository, 
+            IMessagingService messagingService, 
+            ILocationActionEventsRepository locationActionEventsRepository)
         {
             using (DataContext = new SimplySecureDataContext())
             {
@@ -123,7 +128,7 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
                     if (module.Location.Armed && module.State != moduleViewModel.State)
                     {
                         //this should never happen but it is here for completeness
-                        await LocationTriggeringService.DetermineIfTriggering(locationRepository, messagingService, module);
+                        await LocationTriggeringService.DetermineIfTriggering(locationRepository, locationActionEventsRepository ,messagingService, module);
                     }
                 }
 
@@ -131,7 +136,10 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
             }
         }
 
-        public async Task ProcessOfflineModules(ILocationRepository locationRepository, IMessagingService messagingService)
+        public async Task ProcessOfflineModules(
+            ILocationRepository locationRepository, 
+            IMessagingService messagingService, 
+            ILocationActionEventsRepository locationActionEventsRepository)
         {
             using (DataContext = new SimplySecureDataContext())
             {
@@ -151,7 +159,7 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
 
                     if (module.Location.Armed)
                     {
-                        await LocationTriggeringService.DetermineIfTriggering(locationRepository, messagingService, module);
+                        await LocationTriggeringService.DetermineIfTriggering(locationRepository,locationActionEventsRepository, messagingService, module);
                     }
                     else
                     {

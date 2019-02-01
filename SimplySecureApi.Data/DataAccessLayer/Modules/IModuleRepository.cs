@@ -1,4 +1,5 @@
-﻿using SimplySecureApi.Data.DataAccessLayer.Locations;
+﻿using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
+using SimplySecureApi.Data.DataAccessLayer.Locations;
 using SimplySecureApi.Data.Models.Domain.Entity;
 using SimplySecureApi.Data.Models.Domain.ViewModels;
 using SimplySecureApi.Data.Services.Messaging;
@@ -26,8 +27,8 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
 
         Task CreateModule(Module module);
 
-        Task UpdateModuleHeartbeats(List<ModuleViewModel> modules, ILocationRepository locationRepository, IMessagingService messagingService);
+        Task UpdateModuleHeartbeats(List<ModuleViewModel> modulesViewModels, ILocationRepository locationRepository, IMessagingService messagingService, ILocationActionEventsRepository locationActionEventsRepository);
 
-        Task ProcessOfflineModules(ILocationRepository locationRepository, IMessagingService messagingService);
+        Task ProcessOfflineModules(ILocationRepository locationRepository, IMessagingService messagingService, ILocationActionEventsRepository locationActionEventsRepository);
     }
 }

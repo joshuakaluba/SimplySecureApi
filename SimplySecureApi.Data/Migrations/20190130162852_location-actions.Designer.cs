@@ -9,8 +9,8 @@ using SimplySecureApi.Data.DataContext;
 namespace SimplySecureApi.Data.Migrations
 {
     [DbContext(typeof(SimplySecureDataContext))]
-    [Migration("20181209183432_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20190130162852_location-actions")]
+    partial class locationactions
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -133,6 +133,8 @@ namespace SimplySecureApi.Data.Migrations
 
                     b.Property<int>("AccessFailedCount");
 
+                    b.Property<bool>("Active");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
@@ -142,6 +144,8 @@ namespace SimplySecureApi.Data.Migrations
                         .HasMaxLength(256);
 
                     b.Property<bool>("EmailConfirmed");
+
+                    b.Property<string>("FullName");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -178,24 +182,6 @@ namespace SimplySecureApi.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.ArmedModule", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime>("DateCreated");
-
-                    b.Property<Guid>("ModuleId");
-
-                    b.Property<bool>("State");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ModuleId");
-
-                    b.ToTable("ArmedModules");
-                });
-
             modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.BootMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -219,6 +205,10 @@ namespace SimplySecureApi.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<bool>("Active");
+
+                    b.Property<string>("ApplicationUserId");
+
                     b.Property<bool>("Armed");
 
                     b.Property<DateTime>("DateCreated");
@@ -231,7 +221,51 @@ namespace SimplySecureApi.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ApplicationUserId");
+
                     b.ToTable("Locations");
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.LocationActionEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Action");
+
+                    b.Property<string>("ApplicationUserId");
+
+                    b.Property<DateTime>("DateCreated");
+
+                    b.Property<Guid>("LocationId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("LocationActionEvents");
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.LocationUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ApplicationUserId");
+
+                    b.Property<DateTime>("DateCreated");
+
+                    b.Property<Guid>("LocationId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("LocationUsers");
                 });
 
             modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.Module", b =>
@@ -250,6 +284,8 @@ namespace SimplySecureApi.Data.Migrations
                     b.Property<Guid>("LocationId");
 
                     b.Property<string>("Name");
+
+                    b.Property<bool>("Offline");
 
                     b.Property<bool>("State");
 
@@ -278,22 +314,24 @@ namespace SimplySecureApi.Data.Migrations
                     b.ToTable("ModuleEvents");
                 });
 
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.TriggeredModule", b =>
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Notification.PushNotificationToken", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<bool>("Active");
+
+                    b.Property<string>("ApplicationUserId");
+
                     b.Property<DateTime>("DateCreated");
 
-                    b.Property<Guid>("ModuleId");
-
-                    b.Property<bool>("State");
+                    b.Property<string>("Token");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ModuleId");
+                    b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("TriggeredModules");
+                    b.ToTable("PushNotificationTokens");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -341,7 +379,7 @@ namespace SimplySecureApi.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.ArmedModule", b =>
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.BootMessage", b =>
                 {
                     b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Module", "Module")
                         .WithMany()
@@ -349,11 +387,34 @@ namespace SimplySecureApi.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.BootMessage", b =>
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.Location", b =>
                 {
-                    b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Module", "Module")
+                    b.HasOne("SimplySecureApi.Data.Models.Authentication.ApplicationUser", "ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("ModuleId")
+                        .HasForeignKey("ApplicationUserId");
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.LocationActionEvent", b =>
+                {
+                    b.HasOne("SimplySecureApi.Data.Models.Authentication.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.LocationUser", b =>
+                {
+                    b.HasOne("SimplySecureApi.Data.Models.Authentication.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -373,12 +434,11 @@ namespace SimplySecureApi.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.TriggeredModule", b =>
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Notification.PushNotificationToken", b =>
                 {
-                    b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Module", "Module")
+                    b.HasOne("SimplySecureApi.Data.Models.Authentication.ApplicationUser", "ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("ModuleId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ApplicationUserId");
                 });
 #pragma warning restore 612, 618
         }

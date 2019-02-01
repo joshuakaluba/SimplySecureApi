@@ -9,5 +9,7 @@ namespace SimplySecureApi.Data.DataAccessLayer.ModuleEvents
         Task SaveModuleEvent(ModuleEvent moduleEvent);
 
         Task<List<ModuleEvent>> GetModuleEvents();
+
+        Task<List<ModuleEvent>> GetModuleEventsByLocation( Location location);
     }
 }

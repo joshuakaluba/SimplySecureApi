@@ -5,6 +5,7 @@ namespace SimplySecureApi.Data.Models.Domain.ViewModels
 {
     public class LocationViewModel
     {
+        [JsonProperty("id")]
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [JsonProperty("name")]
@@ -14,11 +15,9 @@ namespace SimplySecureApi.Data.Models.Domain.ViewModels
         public bool Armed { get; set; }
 
         [JsonProperty("isSilentAlarm")]
-        public bool IsSilentAlarm { get; set; } = false;
+        public bool IsSilentAlarm { get; set; }
 
         [JsonProperty("triggered")]
         public bool Triggered { get; set; }
-
-        public bool Active { get; set; } = true;
     }
 }

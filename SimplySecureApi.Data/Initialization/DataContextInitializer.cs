@@ -45,6 +45,7 @@ namespace SimplySecureApi.Data.Initialization
                         }
                     }
 
+                    /*
                     var defaultLocation = await context.Locations.FirstOrDefaultAsync();
 
                     if (defaultLocation == null)
@@ -63,6 +64,8 @@ namespace SimplySecureApi.Data.Initialization
 
                         await context.SaveChangesAsync();
                     }
+
+                    */
                 }
             }
         }

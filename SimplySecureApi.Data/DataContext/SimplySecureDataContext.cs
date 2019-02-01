@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Domain.Entity;
+using SimplySecureApi.Data.Models.Notification;
 using SimplySecureApi.Data.Models.Static;
+using System;
 
 namespace SimplySecureApi.Data.DataContext
 {
@@ -14,7 +16,13 @@ namespace SimplySecureApi.Data.DataContext
 
         internal DbSet<Module> Modules { get; set; }
 
+        internal DbSet<LocationUser> LocationUsers { get; set; }
+
+        internal DbSet<LocationActionEvent> LocationActionEvents { get; set; }
+
         internal DbSet<BootMessage> BootMessages { get; set; }
+
+        internal DbSet<PushNotificationToken> PushNotificationTokens { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -27,5 +35,15 @@ namespace SimplySecureApi.Data.DataContext
 
             optionsBuilder.UseMySql(connectionString);
         }
+
+        /*protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder
+                .Entity<LocationActionEvent>()
+                .Property(e => e.Action)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (LocationActionEnum)Enum.Parse(typeof(LocationActionEnum), v));
+        }*/
     }
 }

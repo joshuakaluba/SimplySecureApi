@@ -9,8 +9,8 @@ using SimplySecureApi.Data.DataContext;
 namespace SimplySecureApi.Data.Migrations
 {
     [DbContext(typeof(SimplySecureDataContext))]
-    [Migration("20181210181238_OfflineModules")]
-    partial class OfflineModules
+    [Migration("20190125204847_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -133,6 +133,8 @@ namespace SimplySecureApi.Data.Migrations
 
                     b.Property<int>("AccessFailedCount");
 
+                    b.Property<bool>("Active");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
@@ -142,6 +144,8 @@ namespace SimplySecureApi.Data.Migrations
                         .HasMaxLength(256);
 
                     b.Property<bool>("EmailConfirmed");
+
+                    b.Property<string>("FullName");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -203,6 +207,8 @@ namespace SimplySecureApi.Data.Migrations
 
                     b.Property<bool>("Active");
 
+                    b.Property<string>("ApplicationUserId");
+
                     b.Property<bool>("Armed");
 
                     b.Property<DateTime>("DateCreated");
@@ -214,6 +220,8 @@ namespace SimplySecureApi.Data.Migrations
                     b.Property<bool>("Triggered");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("Locations");
                 });
@@ -262,6 +270,26 @@ namespace SimplySecureApi.Data.Migrations
                     b.HasIndex("ModuleId");
 
                     b.ToTable("ModuleEvents");
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Notification.PushNotificationToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("Active");
+
+                    b.Property<string>("ApplicationUserId");
+
+                    b.Property<DateTime>("DateCreated");
+
+                    b.Property<string>("Token");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("PushNotificationTokens");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -317,6 +345,13 @@ namespace SimplySecureApi.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.Location", b =>
+                {
+                    b.HasOne("SimplySecureApi.Data.Models.Authentication.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId");
+                });
+
             modelBuilder.Entity("SimplySecureApi.Data.Models.Domain.Entity.Module", b =>
                 {
                     b.HasOne("SimplySecureApi.Data.Models.Domain.Entity.Location", "Location")
@@ -331,6 +366,13 @@ namespace SimplySecureApi.Data.Migrations
                         .WithMany()
                         .HasForeignKey("ModuleId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SimplySecureApi.Data.Models.Notification.PushNotificationToken", b =>
+                {
+                    b.HasOne("SimplySecureApi.Data.Models.Authentication.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId");
                 });
 #pragma warning restore 612, 618
         }
