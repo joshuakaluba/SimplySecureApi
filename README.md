@@ -1,4 +1,13 @@
 # SimplySecureApi
+
 Back-end service for the ESC8266 NodeMCU based home security system.
 
-Instructrions to compile and deploy solution coming soon!
+## To Publish
+
+`dotnet publish ./SimplySecureApi.Web/SimplySecureApi.Web.csproj -o ../ApiPublishFiles-c Release`
+
+## To run
+
+Navigate to the `ApiPublishFiles` directory and run
+
+`docker-compose up -d`
