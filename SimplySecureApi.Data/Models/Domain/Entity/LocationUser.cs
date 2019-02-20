@@ -1,6 +1,6 @@
-﻿using SimplySecureApi.Data.Models.Authentication;
+﻿using Newtonsoft.Json;
+using SimplySecureApi.Data.Models.Authentication;
 using System;
-using Newtonsoft.Json;
 
 namespace SimplySecureApi.Data.Models.Domain.Entity
 {
