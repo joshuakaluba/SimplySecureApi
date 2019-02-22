@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.ComponentModel.DataAnnotations;
-using SimplySecureApi.Common.Extensions.Duration;
 
 namespace SimplySecureApi.Data.Models.Domain.Entity
 {
@@ -19,6 +18,7 @@ namespace SimplySecureApi.Data.Models.Domain.Entity
         }
 
         [Display(Name = "State")]
+        [JsonProperty("stateDisplayed")]
         public string StateDisplayed
         {
             get
@@ -28,12 +28,15 @@ namespace SimplySecureApi.Data.Models.Domain.Entity
                     return State.ToString();
                 }
 
-                return 
+                return
                     Module.IsMotionDetector ? State ? "Motion detected" :
                     "No motion detected" :
                     State ? "Door Closed" : "Door Opened";
             }
         }
+
+        [JsonProperty("moduleName")]
+        public string ModuleName => Module != null ? Module.Name : "";
 
         [Display(Name = "State")]
         [JsonProperty("state")]

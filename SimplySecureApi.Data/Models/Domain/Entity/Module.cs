@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
+using SimplySecureApi.Common.Extensions.Duration;
 using System;
 using System.ComponentModel.DataAnnotations;
-using SimplySecureApi.Common.Extensions.Duration;
 
 namespace SimplySecureApi.Data.Models.Domain.Entity
 {
