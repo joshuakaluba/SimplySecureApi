@@ -1,26 +1,26 @@
-﻿using System.Reflection;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using SimplySecureApi.Data.DataAccessLayer.Authentication;
 using SimplySecureApi.Data.DataAccessLayer.Boots;
-using SimplySecureApi.Data.DataAccessLayer.Modules;
+using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
+using SimplySecureApi.Data.DataAccessLayer.Locations;
+using SimplySecureApi.Data.DataAccessLayer.LocationUsers;
 using SimplySecureApi.Data.DataAccessLayer.ModuleEvents;
+using SimplySecureApi.Data.DataAccessLayer.Modules;
+using SimplySecureApi.Data.DataAccessLayer.Panics;
+using SimplySecureApi.Data.DataAccessLayer.PushNotificationTokens;
 using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Initialization;
 using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Static;
-using Microsoft.AspNetCore.Mvc;
-using System.Text;
-using SimplySecureApi.Data.DataAccessLayer.Authentication;
-using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
-using SimplySecureApi.Data.DataAccessLayer.Locations;
-using SimplySecureApi.Data.DataAccessLayer.LocationUsers;
-using SimplySecureApi.Data.DataAccessLayer.PushNotificationTokens;
 using SimplySecureApi.Data.Services.Messaging;
 using SimplySecureApi.Web.MiddleWare;
+using System.Text;
 using TokenOptions = SimplySecureApi.Data.Models.Authentication.TokenOptions;
 
 namespace SimplySecureApi.Web
@@ -57,6 +57,8 @@ namespace SimplySecureApi.Web
 
             services.AddScoped<ILocationRepository, LocationRepository>();
 
+            services.AddScoped<IPanicRepository, PanicRepository>();
+
             services.AddScoped<ILocationUsersRepository, LocationUsersRepository>();
 
             services.AddScoped<ILocationActionEventsRepository, LocationActionEventsRepository>();
@@ -65,7 +67,11 @@ namespace SimplySecureApi.Web
 
             services.AddCors(o => o.AddPolicy("MyPolicy", corsBuilder =>
             {
-                corsBuilder.WithOrigins("http://localhost:4200").WithOrigins("https://testzone.kaluba.tech")
+                corsBuilder.WithOrigins("http://localhost:4200")
+                    .WithOrigins("https://testzone.kaluba.tech")
+                    .WithOrigins("https://simplyweb.kaluba.tech")
+                    .WithOrigins("https://*")
+                    .WithOrigins("http://*")
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();
@@ -82,8 +88,6 @@ namespace SimplySecureApi.Web
             }).AddEntityFrameworkStores<SimplySecureDataContext>()
               .AddDefaultTokenProviders();
 
-
-
             services.AddAuthentication()
                 .AddJwtBearer(cfg =>
                 {
@@ -97,13 +101,11 @@ namespace SimplySecureApi.Web
                     };
                 });
 
-            services.AddMvc( )
+            services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddAuthorization(options => options.AddPolicy("Trusted", policy => policy.RequireClaim("DefaultUserClaim", "DefaultUserAuthorization")));
-
             services.AddOptions();
-
             services.Configure<TokenOptions>(Configuration.GetSection("TokenOptions"));
         }
 
