@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
 using SimplySecureApi.Data.DataAccessLayer.Locations;
 using SimplySecureApi.Data.DataAccessLayer.Modules;
 using SimplySecureApi.Data.Models.Authentication;
@@ -9,11 +11,10 @@ using SimplySecureApi.Data.Services.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
 
 namespace SimplySecureApi.Web.Controllers
 {
-    public class ServicesController : BaseController
+    public class ServicesController : BaseController<ServicesController>
     {
         private readonly IModuleRepository _moduleRepository;
         private readonly ILocationRepository _locationRepository;
@@ -21,22 +22,21 @@ namespace SimplySecureApi.Web.Controllers
         private readonly ILocationActionEventsRepository _locationActionEventsRepository;
 
         public ServicesController(
-            UserManager<ApplicationUser> userManager, 
-            IModuleRepository moduleRepository, 
+            UserManager<ApplicationUser> userManager,
+            IModuleRepository moduleRepository,
             ILocationRepository locationRepository,
-            IMessagingService messagingService, 
-            ILocationActionEventsRepository locationActionEventsRepository)
-            : base(userManager)
+            IMessagingService messagingService,
+            ILocationActionEventsRepository locationActionEventsRepository,
+            ILogger<ServicesController> logger)
+            : base(userManager, logger)
         {
             _moduleRepository = moduleRepository;
-
             _locationRepository = locationRepository;
-
             _locationActionEventsRepository = locationActionEventsRepository;
-
             _messagingService = messagingService;
         }
 
+        //Services/SynchronizeModules
         [HttpPost]
         public async Task<IActionResult> SynchronizeModules([FromBody] List<ModuleViewModel> modules)
         {
@@ -49,10 +49,13 @@ namespace SimplySecureApi.Web.Controllers
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex.Message);
+
                 return BadRequest(new ErrorResponse(ex));
             }
         }
 
+        //Services/ProcessOfflineModules
         [HttpPost]
         public async Task<IActionResult> ProcessOfflineModules()
         {
@@ -64,6 +67,8 @@ namespace SimplySecureApi.Web.Controllers
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex.Message);
+
                 return BadRequest(new ErrorResponse(ex));
             }
         }
