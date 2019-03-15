@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using SimplySecureApi.Common.Extensions.Strings;
 using SimplySecureApi.Data.Initialization;
 using SimplySecureApi.Data.Models.Authentication;
+using System.Threading.Tasks;
 
 namespace SimplySecureApi.Data.DataAccessLayer.Authentication
 {
@@ -19,7 +16,7 @@ namespace SimplySecureApi.Data.DataAccessLayer.Authentication
 
             if (result.Succeeded)
             {
-                var addClaimResult = await userManager.AddClaimAsync(user, DataContextInitializer.DefaultUserClaim);
+                await userManager.AddClaimAsync(user, DataContextInitializer.DefaultUserClaim);
 
                 await userManager.AddToRoleAsync(user, "User");
             }
