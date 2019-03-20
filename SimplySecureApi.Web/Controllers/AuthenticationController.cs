@@ -2,14 +2,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SimplySecureApi.Common.Exception;
 using SimplySecureApi.Common.Extensions.Strings;
 using SimplySecureApi.Data.DataAccessLayer.Authentication;
 using SimplySecureApi.Data.DataAccessLayer.PushNotificationTokens;
-using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Notification;
+using SimplySecureApi.Data.Models.Static;
 using SimplySecureApi.Services.Authentication;
 using System;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ using TokenOptions = SimplySecureApi.Data.Models.Authentication.TokenOptions;
 
 namespace SimplySecureApi.Web.Controllers
 {
-    public class AuthenticationController : BaseController
+    public class AuthenticationController : BaseController<AuthenticationController>
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly TokenOptions _tokenOptions;
@@ -29,8 +30,8 @@ namespace SimplySecureApi.Web.Controllers
             IUserRepository userRepository,
             IPushNotificationTokensRepository pushNotificationTokensRepository,
             IOptions<TokenOptions> tokens,
-            SimplySecureDataContext context)
-            : base(userManager)
+            ILogger<AuthenticationController> logger)
+            : base(userManager, logger)
         {
             _signInManager = signInManager;
             _userRepository = userRepository;
@@ -38,37 +39,36 @@ namespace SimplySecureApi.Web.Controllers
             _pushNotificationTokensRepository = pushNotificationTokensRepository;
         }
 
+        //Authentication/Login
         [HttpPost]
         public async Task<IActionResult> Login([FromBody]LoginViewModel model)
         {
             try
             {
-                var unableTologIn = "Unable to log user in.";
-
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(new ErrorMessage("Incomplete data received."));
+                    return BadRequest(new ErrorMessage(ErrorMessageResponses.IncompleteDataReceived));
                 }
 
                 var user = await UserManager.FindByEmailAsync(model.Email);
 
                 if (user == null)
                 {
-                    return BadRequest(new ErrorMessage(unableTologIn));
+                    return BadRequest(new ErrorMessage(ErrorMessageResponses.UnableToLogIn));
                 }
 
                 var isUserValid = UserValidator.Validate(user);
 
                 if (isUserValid == false)
                 {
-                    return BadRequest(new ErrorMessage("Account de-activated."));
+                    return BadRequest(new ErrorMessage(ErrorMessageResponses.AccountDeactivated));
                 }
 
                 var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
 
                 if (!result.Succeeded)
                 {
-                    return BadRequest(new ErrorMessage(unableTologIn));
+                    return BadRequest(new ErrorMessage(ErrorMessageResponses.UnableToLogIn));
                 }
 
                 var token = await TokenGenerator.Create(user, UserManager, _tokenOptions);
@@ -77,10 +77,13 @@ namespace SimplySecureApi.Web.Controllers
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex.Message);
+
                 return BadRequest(new ErrorMessage(ex));
             }
         }
 
+        //Authentication/Register
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
@@ -88,7 +91,7 @@ namespace SimplySecureApi.Web.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(new ErrorMessage("Incomplete data received."));
+                    return BadRequest(new ErrorMessage(ErrorMessageResponses.IncompleteDataReceived));
                 }
 
                 var user = new ApplicationUser
@@ -103,7 +106,7 @@ namespace SimplySecureApi.Web.Controllers
 
                 if (result.Succeeded == false)
                 {
-                    return BadRequest(new ErrorMessage("Unable to register user."));
+                    return BadRequest(new ErrorMessage(ErrorMessageResponses.UnableToRegister));
                 }
 
                 var token = await TokenGenerator.Create(user, UserManager, _tokenOptions);
@@ -112,10 +115,13 @@ namespace SimplySecureApi.Web.Controllers
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex.Message);
+
                 return BadRequest(new ErrorMessage(ex));
             }
         }
 
+        //Authentication/RegisterPushNotifications
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
         public async Task<IActionResult> RegisterPushNotifications([FromBody] PushNotificationModel model)
@@ -137,10 +143,13 @@ namespace SimplySecureApi.Web.Controllers
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex.Message);
+
                 return BadRequest(new ErrorMessage(ex));
             }
         }
 
+        //Authentication/UnRegisterPushNotifications
         [HttpPost]
         public async Task<IActionResult> UnRegisterPushNotifications([FromBody] PushNotificationModel model)
         {
@@ -157,6 +166,8 @@ namespace SimplySecureApi.Web.Controllers
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex.Message);
+
                 return BadRequest(new ErrorMessage(ex));
             }
         }
