@@ -1,24 +1,26 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using SimplySecureApi.Data.DataAccessLayer.Boots;
+using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
 using SimplySecureApi.Data.DataAccessLayer.Locations;
 using SimplySecureApi.Data.DataAccessLayer.Modules;
 using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Domain.Entity;
 using SimplySecureApi.Data.Models.Domain.ViewModels;
 using SimplySecureApi.Data.Models.Response;
+using SimplySecureApi.Data.Models.Static;
 using SimplySecureApi.Data.Services;
+using SimplySecureApi.Data.Services.Messaging;
 using System;
 using System.Threading.Tasks;
-using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
-using SimplySecureApi.Data.Services.Messaging;
 
 namespace SimplySecureApi.Web.Controllers
 {
     [Route("api/[controller]")]
     [Produces("application/json")]
     [ApiController]
-    public class BootController : BaseController
+    public class BootController : BaseController<BootController>
     {
         private readonly IBootRepository _bootRepository;
         private readonly IModuleRepository _moduleRepository;
@@ -27,22 +29,19 @@ namespace SimplySecureApi.Web.Controllers
         private readonly IMessagingService _messagingService;
 
         public BootController(
-            UserManager<ApplicationUser> userManager, 
-            IBootRepository bootRepository, 
+            UserManager<ApplicationUser> userManager,
+            IBootRepository bootRepository,
             IModuleRepository moduleRepository,
-            ILocationRepository locationRepository, 
-            IMessagingService messagingService, 
-            ILocationActionEventsRepository locationActionEventsRepository)
-            : base(userManager)
+            ILocationRepository locationRepository,
+            IMessagingService messagingService,
+            ILocationActionEventsRepository locationActionEventsRepository,
+            ILogger<BootController> logger)
+            : base(userManager, logger)
         {
             _bootRepository = bootRepository;
-
             _moduleRepository = moduleRepository;
-
             _locationRepository = locationRepository;
-
             _locationActionEventsRepository = locationActionEventsRepository;
-
             _messagingService = messagingService;
         }
 
@@ -57,7 +56,7 @@ namespace SimplySecureApi.Web.Controllers
 
                 if (module == null)
                 {
-                    return BadRequest(new Exception("Invalid module id"));
+                    return BadRequest(new Exception(ErrorMessageResponses.InvalidModuleId));
                 }
 
                 await _bootRepository
@@ -76,6 +75,8 @@ namespace SimplySecureApi.Web.Controllers
             }
             catch (Exception ex)
             {
+                Logger.LogError(ex.Message);
+
                 return BadRequest(new ErrorResponse(ex));
             }
         }
