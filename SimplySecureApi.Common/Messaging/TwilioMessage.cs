@@ -7,16 +7,14 @@ namespace SimplySecureApi.Common.Messaging
 {
     public class TwilioMessage
     {
-        private string _accountSid = "";
-        private string _authenticationToken = "";
-        private string _senderPhoneNumber = "";
+        private readonly string _accountSid;
+        private readonly string _authenticationToken;
+        private readonly string _senderPhoneNumber;
 
         public TwilioMessage(string accountSid, string authenticationToken, string senderPhoneNumber)
         {
             _accountSid = accountSid;
-
             _authenticationToken = authenticationToken;
-
             _senderPhoneNumber = senderPhoneNumber;
         }
 
@@ -25,12 +23,10 @@ namespace SimplySecureApi.Common.Messaging
             TwilioClient.Init(_accountSid, _authenticationToken);
 
             var messageOptions = new CreateMessageOptions(new PhoneNumber(recipientPhoneNumber));
-
             messageOptions.From = new PhoneNumber(_senderPhoneNumber);
-
             messageOptions.Body = messageContent;
 
-            var message = await MessageResource.CreateAsync(messageOptions);
+            await MessageResource.CreateAsync(messageOptions);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace SimplySecureApi.Data.Models.Domain.Entity
         [ScaffoldColumn(false)]
         public virtual DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
-        public bool Equals(Auditable other)
+        public virtual bool Equals(Auditable other)
         {
             return Id == other.Id;
         }

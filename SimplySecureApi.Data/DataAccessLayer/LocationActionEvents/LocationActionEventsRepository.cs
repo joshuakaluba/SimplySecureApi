@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Models.Domain.Entity;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SimplySecureApi.Data.DataAccessLayer.LocationActionEvents
 {
@@ -25,10 +23,10 @@ namespace SimplySecureApi.Data.DataAccessLayer.LocationActionEvents
         {
             using (DataContext = new SimplySecureDataContext())
             {
-                var actionEvents 
+                var actionEvents
                     = await DataContext.LocationActionEvents
                         .Where(a => a.LocationId == location.Id)
-                            .Include(e=>e.ApplicationUser)
+                            .Include(e => e.ApplicationUser)
                                 .OrderByDescending(l => l.DateCreated)
                                     .ToListAsync();
 

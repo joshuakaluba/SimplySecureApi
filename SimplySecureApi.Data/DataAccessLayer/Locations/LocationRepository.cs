@@ -4,6 +4,7 @@ using SimplySecureApi.Data.DataAccessLayer.LocationUsers;
 using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Domain.Entity;
+using SimplySecureApi.Data.Models.Static;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -94,11 +95,16 @@ namespace SimplySecureApi.Data.DataAccessLayer.Locations
             }
         }
 
-        public async Task<Location> FindLocationById(Guid id)
+        public async Task<Location> GetLocationById(Guid id)
         {
             using (DataContext = new SimplySecureDataContext())
             {
                 var location = await DataContext.Locations.FindAsync(id);
+
+                if (location == null)
+                {
+                    throw new NullReferenceException(ErrorMessageResponses.UnableToFindLocation);
+                }
 
                 return location;
             }
@@ -122,7 +128,8 @@ namespace SimplySecureApi.Data.DataAccessLayer.Locations
                     await DataContext.LocationUsers
                             .Where(m => m.ApplicationUserId == user.Id)
                                 .Select(m => m.Location)
-                                    .ToListAsync();
+                                    .OrderBy(m => m.Name)
+                                        .ToListAsync();
                 return locations;
             }
         }
@@ -135,18 +142,7 @@ namespace SimplySecureApi.Data.DataAccessLayer.Locations
 
             if (found == false)
             {
-                throw new Exception("User is not authorized for current location");
-            }
-
-        }
-
-        public async Task UpdateLocation(Location location)
-        {
-            using (DataContext = new SimplySecureDataContext())
-            {
-                DataContext.Locations.Update(location);
-
-                await DataContext.SaveChangesAsync();
+                throw new Exception(ErrorMessageResponses.UserNotAuthorizedForLocation);
             }
         }
     }

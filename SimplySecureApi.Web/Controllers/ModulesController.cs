@@ -1,223 +1,149 @@
-﻿//using Microsoft.AspNetCore.Identity;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.AspNetCore.Mvc.Rendering;
-//using SimplySecureApi.Data.DataAccessLayer.Locations;
-//using SimplySecureApi.Data.DataAccessLayer.Modules;
-//using SimplySecureApi.Data.Models.Authentication;
-//using SimplySecureApi.Data.Models.Domain.Entity;
-//using SimplySecureApi.Data.Models.Response;
-//using System;
-//using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using SimplySecureApi.Common.Exception;
+using SimplySecureApi.Data.DataAccessLayer.Locations;
+using SimplySecureApi.Data.DataAccessLayer.ModuleEvents;
+using SimplySecureApi.Data.DataAccessLayer.Modules;
+using SimplySecureApi.Data.Models.Authentication;
+using SimplySecureApi.Data.Models.Domain.Entity;
+using SimplySecureApi.Data.Models.Domain.ViewModels;
+using SimplySecureApi.Data.Models.Response;
+using SimplySecureApi.Data.Models.Static;
+using System;
+using System.Threading.Tasks;
 
-//namespace SimplySecureApi.Web.Controllers
-//{
-//    public class ModulesController : BaseController
-//    {
-//        private readonly IModuleRepository _moduleRepository;
-//        private readonly ILocationRepository _locationRepository;
+namespace SimplySecureApi.Web.Controllers
+{
+    public class ModulesController : BaseController<ModulesController>
+    {
+        private readonly ILocationRepository _locationRepository;
+        private readonly IModuleRepository _moduleRepository;
+        private readonly IModuleEventRepository _moduleEventRepository;
 
-//        public ModulesController(UserManager<ApplicationUser> userManager, IModuleRepository moduleRepository, ILocationRepository locationRepository)
-//            : base(userManager)
-//        {
-//            _moduleRepository = moduleRepository;
+        public ModulesController(UserManager<ApplicationUser> userManager,
+            IModuleRepository moduleRepository,
+            IModuleEventRepository moduleEventRepository,
+            ILocationRepository locationRepository,
+            ILogger<ModulesController> logger)
+            : base(userManager, logger)
+        {
+            _locationRepository = locationRepository;
+            _moduleRepository = moduleRepository;
+            _moduleEventRepository = moduleEventRepository;
+        }
 
-//            _locationRepository = locationRepository;
-//        }
+        //Modules/GetModulesByLocation/{id}
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> GetModulesByLocation(Guid id)
+        {
+            try
+            {
+                var location
+                    = await _locationRepository.GetLocationById(id);
 
-//        public async Task<IActionResult> Index()
-//        {
-//            try
-//            {
-//                var modules = await _moduleRepository.GetAllModules();
+                var modules
+                    = await _moduleRepository
+                        .GetModulesByLocation(location);
 
-//                return View(modules);
-//            }
-//            catch (Exception ex)
-//            {
-//                TempData["ErrorMessage"] = ex.Message;
+                return Ok(modules);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message);
 
-//                return RedirectToAction("Error", "Home");
-//            }
-//        }
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
 
-//        public async Task<IActionResult> Create()
-//        {
-//            try
-//            {
-//                var locations = await _locationRepository.GetLocationsForUser();
+        //Modules/GetModuleEventsByLocation/{id}
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> GetModuleEventsByLocation(Guid id)
+        {
+            try
+            {
+                var location = await _locationRepository.GetLocationById(id);
 
-//                ViewData["LocationId"] = new SelectList(locations, "Id", "Name");
+                var user = await GetUser();
 
-//                return View();
-//            }
-//            catch (Exception ex)
-//            {
-//                TempData["ErrorMessage"] = ex.Message;
+                await _locationRepository.ValidateLocationForUser(user, location);
 
-//                return RedirectToAction("Error", "Home");
-//            }
-//        }
+                var moduleEvents
+                    = await _moduleEventRepository.GetModuleEventsByLocation(location);
 
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public async Task<IActionResult> Create([Bind("Name,State,IsMotionDetector,LocationId")] Module module)
-//        {
-//            try
-//            {
-//                if (ModelState.IsValid)
-//                {
-//                    module.Id = Guid.NewGuid();
+                return Ok(moduleEvents);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message);
 
-//                    module.IsMotionDetector = false;
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
 
-//                    await _moduleRepository.CreateModule(module);
+        //Modules/CreateNewModule
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> CreateNewModule([FromBody] ModuleViewModel moduleViewModel)
+        {
+            try
+            {
+                var user = await GetUser();
 
-//                    TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{module.Name} module created successfully.");
+                var location = await _locationRepository.GetLocationById(moduleViewModel.LocationId);
 
-//                    return RedirectToAction(nameof(Index));
-//                }
+                if (location.ApplicationUserId != user.Id)
+                {
+                    return BadRequest(new ErrorMessage(ErrorMessageResponses.UnAuthorizedModifyLocation));
+                }
 
-//                var locations = await _locationRepository.GetLocationsForUser();
+                var module = new Module
+                {
+                    LocationId = moduleViewModel.LocationId,
+                    Name = moduleViewModel.Name,
+                    IsMotionDetector = moduleViewModel.IsMotionDetector
+                };
 
-//                ViewData["LocationId"] = new SelectList(locations, "Id", "Name", module.LocationId);
+                await _moduleRepository.CreateModule(module);
 
-//                return View(module);
-//            }
-//            catch (Exception ex)
-//            {
-//                TempData["ErrorMessage"] = ex.Message;
+                return Ok(moduleViewModel);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message);
 
-//                return RedirectToAction("Error", "Home");
-//            }
-//        }
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
 
-//        public async Task<IActionResult> Edit(Guid? id)
-//        {
-//            try
-//            {
-//                if (id == null)
-//                {
-//                    return NotFound();
-//                }
+        //Modules/DeleteModule/{id}
+        [HttpDelete]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Trusted")]
+        public async Task<IActionResult> DeleteModule(Guid id)
+        {
+            try
+            {
+                var module
+                    = await _moduleRepository.FindModule(id);
 
-//                var module = await _moduleRepository.FindModule((Guid)id);
+                if (module == null)
+                {
+                    return BadRequest(new ErrorMessage(ErrorMessageResponses.UnableToFindModule));
+                }
+                await _moduleRepository.DeleteModule(module);
 
-//                if (module == null)
-//                {
-//                    return NotFound();
-//                }
+                return Ok(id);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message);
 
-//                var locations = await _locationRepository.GetLocationsForUser();
-
-//                ViewData["LocationId"] = new SelectList(locations, "Id", "Name", module.LocationId);
-
-//                return View(module);
-//            }
-//            catch (Exception ex)
-//            {
-//                TempData["ErrorMessage"] = ex.Message;
-
-//                return RedirectToAction("Error", "Home");
-//            }
-//        }
-
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public async Task<IActionResult> Edit(Guid id, [Bind("Name,IsMotionDetector,LocationId,Id")] Module module)
-//        {
-//            try
-//            {
-//                if (id != module.Id)
-//                {
-//                    return NotFound();
-//                }
-
-//                if (ModelState.IsValid)
-//                {
-//                    var dbModule = await _moduleRepository.FindModule(module.Id);
-
-//                    if (dbModule == null)
-//                    {
-//                        return NotFound();
-//                    }
-
-//                    dbModule.Name = module.Name;
-//                    dbModule.IsMotionDetector = module.IsMotionDetector;
-//                    dbModule.LocationId = module.LocationId;
-
-//                    await _moduleRepository.UpdateModule(dbModule);
-
-//                    TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{module.Name} module saved successfully.");
-
-//                    return RedirectToAction(nameof(Index));
-//                }
-
-//                var locations = await _locationRepository.GetLocationsForUser();
-
-//                ViewData["LocationId"] = new SelectList(locations, "Id", "Name", module.LocationId);
-
-//                return View(module);
-//            }
-//            catch (Exception ex)
-//            {
-//                TempData["ErrorMessage"] = ex.Message;
-
-//                return RedirectToAction("Error", "Home");
-//            }
-//        }
-
-//        public async Task<IActionResult> Delete(Guid? id)
-//        {
-//            try
-//            {
-//                if (id == null)
-//                {
-//                    return NotFound();
-//                }
-
-//                var module
-//                    = await _moduleRepository.FindModule((Guid)id);
-
-//                if (module == null)
-//                {
-//                    return NotFound();
-//                }
-
-//                return View(module);
-//            }
-//            catch (Exception ex)
-//            {
-//                TempData["ErrorMessage"] = ex.Message;
-
-//                return RedirectToAction("Error", "Home");
-//            }
-//        }
-
-//        [HttpPost, ActionName("Delete")]
-//        [ValidateAntiForgeryToken]
-//        public async Task<IActionResult> DeleteConfirmed(Guid id)
-//        {
-//            try
-//            {
-//                var module = await _moduleRepository.FindModule(id);
-
-//                if (module == null)
-//                {
-//                    return NotFound();
-//                }
-
-//                await _moduleRepository.DeleteModule(module);
-
-//                TempData["CustomResponseAlert"] = CustomResponseAlert.GetStringResponse(ResponseStatusEnum.Success, $"{module.Name} module deleted successfully.");
-
-//                return RedirectToAction(nameof(Index));
-//            }
-//            catch (Exception ex)
-//            {
-//                TempData["ErrorMessage"] = ex.Message;
-
-//                return RedirectToAction("Error", "Home");
-//            }
-//        }
-//    }
-//}
+                return BadRequest(new ErrorResponse(ex));
+            }
+        }
+    }
+}

@@ -4,6 +4,7 @@
     {
         Triggered,
         Armed,
-        Disarmed
+        Disarmed,
+        Panic
     }
 }

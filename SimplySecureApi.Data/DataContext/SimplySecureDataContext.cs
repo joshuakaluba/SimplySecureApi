@@ -4,7 +4,6 @@ using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Domain.Entity;
 using SimplySecureApi.Data.Models.Notification;
 using SimplySecureApi.Data.Models.Static;
-using System;
 
 namespace SimplySecureApi.Data.DataContext
 {
@@ -12,9 +11,11 @@ namespace SimplySecureApi.Data.DataContext
     {
         internal DbSet<ModuleEvent> ModuleEvents { get; set; }
 
-        public DbSet<Location> Locations { get; set; }
+        internal DbSet<Location> Locations { get; set; }
 
         internal DbSet<Module> Modules { get; set; }
+
+        internal DbSet<Panic> Panics { get; set; }
 
         internal DbSet<LocationUser> LocationUsers { get; set; }
 
@@ -35,15 +36,5 @@ namespace SimplySecureApi.Data.DataContext
 
             optionsBuilder.UseMySql(connectionString);
         }
-
-        /*protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder
-                .Entity<LocationActionEvent>()
-                .Property(e => e.Action)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => (LocationActionEnum)Enum.Parse(typeof(LocationActionEnum), v));
-        }*/
     }
 }

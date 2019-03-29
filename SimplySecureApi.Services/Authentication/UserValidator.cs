@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using SimplySecureApi.Data.Models.Authentication;
+﻿using SimplySecureApi.Data.Models.Authentication;
 
 namespace SimplySecureApi.Services.Authentication
 {

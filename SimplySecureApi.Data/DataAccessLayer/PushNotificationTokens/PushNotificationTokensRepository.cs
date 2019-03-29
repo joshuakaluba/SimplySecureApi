@@ -1,17 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SimplySecureApi.Data.DataContext;
+using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Notification;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SimplySecureApi.Data.Models.Authentication;
-using SimplySecureApi.Data.Models.Domain.Entity;
 
 namespace SimplySecureApi.Data.DataAccessLayer.PushNotificationTokens
 {
     public class PushNotificationTokensRepository : BaseRepository, IPushNotificationTokensRepository
     {
-        //private I
         public async Task SavePushNotificationToken(PushNotificationToken token)
         {
             using (DataContext = new SimplySecureDataContext())
@@ -42,11 +40,11 @@ namespace SimplySecureApi.Data.DataAccessLayer.PushNotificationTokens
         {
             using (DataContext = new SimplySecureDataContext())
             {
-               var userIds = users.Select(c => c.Id).Distinct().ToList();
+                var userIds = users.Select(c => c.Id).Distinct().ToList();
 
                 var tokens
                     = await DataContext.PushNotificationTokens
-                        .Where(n=> userIds.Contains(n.ApplicationUserId))
+                        .Where(n => userIds.Contains(n.ApplicationUserId))
                             .ToListAsync();
 
                 return tokens;

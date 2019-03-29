@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
 using SimplySecureApi.Data.DataAccessLayer.Locations;
 using SimplySecureApi.Data.DataContext;
 using SimplySecureApi.Data.Models.Domain.Entity;
@@ -9,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
 
 namespace SimplySecureApi.Data.DataAccessLayer.Modules
 {
@@ -29,17 +29,6 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
             }
         }
 
-        public async Task<List<Module>> GetAllModules()
-        {
-            using (DataContext = new SimplySecureDataContext())
-            {
-                var modules
-                    = await DataContext.Modules.Include(m => m.Location).ToListAsync();
-
-                return modules;
-            }
-        }
-
         public async Task<List<Module>> GetModulesByLocation(Location location)
         {
             using (DataContext = new SimplySecureDataContext())
@@ -48,7 +37,9 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
                     = await DataContext
                         .Modules
                             .Where(b => b.LocationId == location.Id)
-                                .Include(m => m.Location).ToListAsync();
+                                .Include(m => m.Location)
+                                    .OrderBy(m => m.Name)
+                                        .ToListAsync();
                 return modules;
             }
         }
@@ -98,9 +89,9 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
         }
 
         public async Task UpdateModuleHeartbeats(
-            List<ModuleViewModel> modulesViewModels, 
-            ILocationRepository locationRepository, 
-            IMessagingService messagingService, 
+            List<ModuleViewModel> modulesViewModels,
+            ILocationRepository locationRepository,
+            IMessagingService messagingService,
             ILocationActionEventsRepository locationActionEventsRepository)
         {
             using (DataContext = new SimplySecureDataContext())
@@ -128,7 +119,7 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
                     if (module.Location.Armed && module.State != moduleViewModel.State)
                     {
                         //this should never happen but it is here for completeness
-                        await LocationTriggeringService.DetermineIfTriggering(locationRepository, locationActionEventsRepository ,messagingService, module);
+                        await LocationTriggeringService.DetermineIfTriggering(locationRepository, locationActionEventsRepository, messagingService, module);
                     }
                 }
 
@@ -137,8 +128,8 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
         }
 
         public async Task ProcessOfflineModules(
-            ILocationRepository locationRepository, 
-            IMessagingService messagingService, 
+            ILocationRepository locationRepository,
+            IMessagingService messagingService,
             ILocationActionEventsRepository locationActionEventsRepository)
         {
             using (DataContext = new SimplySecureDataContext())
@@ -159,7 +150,7 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
 
                     if (module.Location.Armed)
                     {
-                        await LocationTriggeringService.DetermineIfTriggering(locationRepository,locationActionEventsRepository, messagingService, module);
+                        await LocationTriggeringService.DetermineIfTriggering(locationRepository, locationActionEventsRepository, messagingService, module);
                     }
                     else
                     {

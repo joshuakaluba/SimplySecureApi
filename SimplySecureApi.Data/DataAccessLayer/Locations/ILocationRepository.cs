@@ -1,10 +1,10 @@
-﻿using SimplySecureApi.Data.Models.Domain.Entity;
+﻿using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
+using SimplySecureApi.Data.DataAccessLayer.LocationUsers;
+using SimplySecureApi.Data.Models.Authentication;
+using SimplySecureApi.Data.Models.Domain.Entity;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
-using SimplySecureApi.Data.DataAccessLayer.LocationUsers;
-using SimplySecureApi.Data.Models.Authentication;
 
 namespace SimplySecureApi.Data.DataAccessLayer.Locations
 {
@@ -18,14 +18,12 @@ namespace SimplySecureApi.Data.DataAccessLayer.Locations
 
         Task DisarmLocation(Location location, ApplicationUser user, ILocationActionEventsRepository locationActionEventsRepository);
 
-        Task<Location> FindLocationById(Guid id);
+        Task<Location> GetLocationById(Guid id);
 
         Task DeleteLocation(Location location);
 
         Task<List<Location>> GetLocationsForUser(ApplicationUser user);
 
         Task ValidateLocationForUser(ApplicationUser user, Location location);
-
-        Task UpdateLocation(Location location);
     }
 }

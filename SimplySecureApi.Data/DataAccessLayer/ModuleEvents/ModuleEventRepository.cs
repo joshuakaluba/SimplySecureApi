@@ -19,31 +19,16 @@ namespace SimplySecureApi.Data.DataAccessLayer.ModuleEvents
             }
         }
 
-        public async Task<List<ModuleEvent>> GetModuleEvents()
-        {
-            using (DataContext = new SimplySecureDataContext())
-            {
-                var modules
-                    = await DataContext.ModuleEvents
-                        .Include(m => m.Module)
-                            .OrderByDescending(m => m.DateCreated)
-                                .Take(500)
-                                    .ToListAsync();
-
-                return modules;
-            }
-        }
-
         public async Task<List<ModuleEvent>> GetModuleEventsByLocation(Location location)
         {
             using (DataContext = new SimplySecureDataContext())
             {
-                var moduleEvents 
+                var moduleEvents
                     = await DataContext.ModuleEvents
                         .Where(m => m.Module.LocationId == location.Id)
                             .Include(m => m.Module)
                                 .OrderByDescending(m => m.DateCreated)
-                                    .Take(500)
+                                    .Take(200)
                                         .ToListAsync();
 
                 return moduleEvents;

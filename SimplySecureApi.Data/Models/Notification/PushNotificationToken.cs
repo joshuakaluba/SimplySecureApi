@@ -16,5 +16,12 @@ namespace SimplySecureApi.Data.Models.Notification
         public string ApplicationUserId { get; set; }
 
         public virtual ApplicationUser ApplicationUser { get; set; }
+
+        public override bool Equals(Auditable other)
+        {
+            var token = (PushNotificationToken) other;
+
+            return Token == token.Token;
+        }
     }
 }

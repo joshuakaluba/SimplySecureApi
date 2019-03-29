@@ -71,10 +71,19 @@ namespace SimplySecureApi.Data.DataAccessLayer.LocationUsers
                         .Where(l => l.LocationId == location.Id)
                             .Include(l => l.Location)
                                 .Include(l => l.ApplicationUser)
-                                    .ToListAsync();
-
+                                    .OrderBy(m => m.Name)
+                                        .ToListAsync();
                 return locationUsers;
             }
+        }
+
+        public async Task<List<ApplicationUser>> GetLocationApplicationUsers(Location location)
+        {
+            var locationUsers = await GetLocationUsers(location);
+
+            var applicationUsers = locationUsers.Select(m => m.ApplicationUser).ToList();
+
+            return applicationUsers;
         }
     }
 }

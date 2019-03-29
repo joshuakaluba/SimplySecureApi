@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using SimplySecureApi.Data.Models.Authentication;
+﻿using SimplySecureApi.Data.Models.Authentication;
 using SimplySecureApi.Data.Models.Domain.Entity;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SimplySecureApi.Data.DataAccessLayer.LocationUsers
 {
@@ -19,6 +18,6 @@ namespace SimplySecureApi.Data.DataAccessLayer.LocationUsers
 
         Task<List<LocationUser>> GetLocationUsers(Location location);
 
-        //Task<bool> ValidateUserLocation
+        Task<List<ApplicationUser>> GetLocationApplicationUsers(Location location);
     }
 }

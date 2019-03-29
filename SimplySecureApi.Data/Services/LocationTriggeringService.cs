@@ -1,9 +1,9 @@
-﻿using SimplySecureApi.Data.DataAccessLayer.Locations;
+﻿using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
+using SimplySecureApi.Data.DataAccessLayer.Locations;
 using SimplySecureApi.Data.Models.Domain.Entity;
 using SimplySecureApi.Data.Models.Response;
 using SimplySecureApi.Data.Services.Messaging;
 using System.Threading.Tasks;
-using SimplySecureApi.Data.DataAccessLayer.LocationActionEvents;
 
 namespace SimplySecureApi.Data.Services
 {
@@ -12,7 +12,7 @@ namespace SimplySecureApi.Data.Services
         public static async Task<ModuleResponse> DetermineIfTriggering(
             ILocationRepository locationRepository,
             ILocationActionEventsRepository locationActionEventsRepository,
-            IMessagingService messagingService, 
+            IMessagingService messagingService,
             Module module)
         {
             var location = module.Location;

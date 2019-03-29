@@ -1,11 +1,11 @@
 version: "3.3"
 
 services:
-  api_db:
+  api_database:
     image: mysql:5.7
     restart: unless-stopped
     volumes:
-      - api_db_data_volume:/var/lib/mysql
+      - api_db_database_volume:/var/lib/mysql
           
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -17,21 +17,22 @@ services:
     build: ./
     restart: unless-stopped
     depends_on:
-      - api_db
+      - api_database
     ports:
       - ${SIMPLY_SECURE_API_APPLICATION_PORT}:${SIMPLY_SECURE_API_APPLICATION_PORT}
     environment:
       SIMPLY_SECURE_API_APPLICATION_PORT: ${SIMPLY_SECURE_API_APPLICATION_PORT}
       SIMPLY_SECURE_API_DB_NAME: ${MYSQL_DATABASE}
       SIMPLY_SECURE_API_DB_USER: ${MYSQL_USER}
-      SIMPLY_SECURE_API_DB_PASSWORD: ${MYSQL_PASSWORD}
+      SIMPLY_SECURE_API_DB_PASSWORD: ${MYSQL_PASSWORD}      
       SIMPLY_SECURE_API_JWT_KEY: ${SIMPLY_SECURE_API_JWT_KEY}
-      SIMPLY_SECURE_API_DB_HOST: ${SIMPLY_SECURE_API_DB_HOST}
+      SIMPLY_SECURE_API_DB_HOST: api_database      
+      SIMPLY_SECURE_API_SEND_TWILIO_MESSAGE: ${SIMPLY_SECURE_API_SEND_TWILIO_MESSAGE}
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}      
       TWILIO_AUTHENTICATION_TOKEN: ${TWILIO_AUTHENTICATION_TOKEN}      
       TWILIO_SENDER_PHONENUMBER: ${TWILIO_SENDER_PHONENUMBER}      
       TWILIO_RECIPIENT_PHONENUMBER: ${TWILIO_RECIPIENT_PHONENUMBER}      
 
 volumes:
-    api_db_data_volume:
+    api_db_database_volume:
       driver: local

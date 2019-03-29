@@ -13,8 +13,6 @@ namespace SimplySecureApi.Data.DataAccessLayer.Modules
     {
         Task<Module> FindModule(Guid moduleId);
 
-        Task<List<Module>> GetAllModules();
-
         Task<List<Module>> GetModulesByLocation(Location location);
 
         Task UpdateModuleState(Module module, bool state);

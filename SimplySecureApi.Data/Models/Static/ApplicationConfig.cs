@@ -20,6 +20,9 @@ namespace SimplySecureApi.Data.Models.Static
             = Environment.GetEnvironmentVariable
                 ("SIMPLY_SECURE_API_DB_PASSWORD", target: EnvironmentVariableTarget.Process);
 
+        internal static bool SendTwillioMessage => Environment.GetEnvironmentVariable
+                ("SIMPLY_SECURE_API_SEND_TWILIO_MESSAGE", target: EnvironmentVariableTarget.Process).ToLower().Contains("true");
+
         internal static string DatabaseHost
             = Environment.GetEnvironmentVariable
                 ("SIMPLY_SECURE_API_DB_HOST", target: EnvironmentVariableTarget.Process);
